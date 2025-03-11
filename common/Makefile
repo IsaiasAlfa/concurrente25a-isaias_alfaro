@@ -20,8 +20,9 @@ ARGS=#= Execution arguments, e.g: 'ARGS=100 "a text"'
 ARGSJR=-ea
 RUNPRE=#= Execution prefix e.g: for `time ./myapp` run `make RUNPRE=time`
 RUNSUF=#= Execution suffix e.g: for `./myapp |sort` run `make RUNSUF=|sort`
-GITUSER=$(shell getent passwd "$USER" | cut -d: -f5 | cut -d, -f1)#= Your full name e.g: "Ana Soto"
-GITEMAIL=
+# GITUSER=$(shell getent passwd "$USER" | cut -d: -f5 | cut -d, -f1)#= Your full name e.g: "Ana Soto"
+GITUSER=Isaias Alfaro
+GITEMAIL=isaias.alfaro@ucr.ac.cr
 GITTIME=10800#= Store git password in memory for this amount of seconds (default 3h)
 HOST=$(subst .local,,$(shell hostname))
 

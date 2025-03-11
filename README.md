@@ -1,49 +1,49 @@
-#Glosario
+Glosario
 
-Programación serial.
+1.Programación serial.
 
-Programación concurrente.
+2.Programación concurrente.
 
-Programación paralela.
+3.Programación paralela.
 
-Concurrencia de tareas.
+4.Concurrencia de tareas.
 
-Paralelismo de datos.
+5.Paralelismo de datos.
 
-Hilo de ejecución.
+6.Hilo de ejecución.
 
-Indeterminismo.
+7.Indeterminismo.
 
-Memoria privada y compartida.
+8.Memoria privada y compartida.
 
-Espera activa.
+9.Espera activa.
 
-Condición de carrera.
+10.Condición de carrera.
 
-Control de concurrencia.
+11.Control de concurrencia.
 
-Seguridad condicional.
+12.Seguridad condicional.
 
-Exclusión mutua.
+13.Exclusión mutua.
 
-Semáforo.
+14.Semáforo.
 
-Barrera.
+15Barrera.
 
-Variable de condición.
+16.Variable de condición.
 
-Candado de lectura y escritura.
+17.Candado de lectura y escritura.
 
-Descomposición.
+18.Descomposición.
 
-Mapeo.
+19.Mapeo.
 
-Incremento de velocidad (speedup).
+20.Incremento de velocidad (speedup).
 
-Eficiencia.
+21.Eficiencia.
 
-Comunicación punto a punto entre procesos.
+22.Comunicación punto a punto entre procesos.
 
-Comunicación colectiva entre procesos.
+23.Comunicación colectiva entre procesos.
 
-Reducción.
+24.Reducción.

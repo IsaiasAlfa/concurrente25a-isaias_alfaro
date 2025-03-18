@@ -6,16 +6,20 @@
 // #include <unistd.h>
 
 /**
- * @brief ...
+ * @brief Funcion que imprime un mensaje y crea un hilo si es mayor a 2
+ * 
+ * @param arg Puntero con el numero para ver si se ejecutara correctamente
+ * @return Null 
  */
-void* greet(void* data);
+void* greet(void* arg);
 
 // procedure main:
 int main(void) {
   // create_thread(greet)
   pthread_t thread;  // creacion del hilo que se va a utilizar
   // ver si se creo o no el hilo
-  int error = pthread_create(&thread, /*attr*/ NULL, greet, /*arg*/ NULL);
+  size_t prueba = 2;
+  int error = pthread_create(&thread, NULL, greet, &prueba);
   if (error == EXIT_SUCCESS) {
     // print "Hello from main thread"
     // usleep(1);  // indeterminism
@@ -29,9 +33,20 @@ int main(void) {
 
 // procedure greet:
 // Metodo que se llama para que el nuevo hilo ejecute
-void* greet(void* data) {
-  (void)data;
-  // print "Hello from secondary thread"
-  printf("Hello from secondary thread\n");
+void* greet(void* arg) {
+  size_t number = *(size_t*)arg;
+  if (number == 0) {
+    printf("Bye ");
+    printf("%ld\n", number);
+  } else if (number > 0) {
+    printf("Hello ");
+    printf("%ld\n", number);
+    number = number-1;
+    pthread_t thread;
+    int error = pthread_create(&thread, NULL, greet, &number);
+    if (error == EXIT_SUCCESS) {
+      pthread_join(thread, NULL);
+  }
+  }
   return NULL;
 }  // end procedure

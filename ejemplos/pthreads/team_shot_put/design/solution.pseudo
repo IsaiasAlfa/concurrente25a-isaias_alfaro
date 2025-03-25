@@ -1,0 +1,56 @@
+const team_count = 2
+const shot_count = 3
+
+procedure main(argc, argv[])  // referee
+  // Get the number of athletes in each team
+  shared athlete_count := integer(argv[1])
+  // Athlete count must be odd
+  if athlete_count is odd then
+    // Create a score board to record the best shots
+    shared best_shots := 0.0[team_count][athlete_count]
+    compete()
+    print_result()
+  else
+    print(stderr, "error: athlete count must be odd")
+  end if
+end procedure
+
+procedure compete()
+  // For each team
+  for team_number := 0 to team_count do
+    // For each athlete
+    for athlete_number := 0 to athlete_count do
+      // Score the best shot this athlete reached
+      best_shots[team_number][athlete_number] := shot(team_number, athlete_number)
+    end for
+  end for
+end procedure
+
+procedure shot(team_number, athlete_number)
+  declare my_best_shot := 0.0
+  for shot_number := 0 to shot_count do
+    shot_distance := random(0.0, 25.0)
+    if shot_distance > my_best_shot then
+      my_best_shot := shot_distance
+    end if
+  end for
+  print team_number, ".", athlete_number, ": best shot put ", my_best_shot, "m"
+  return my_best_shot
+end procedure
+
+procedure print_result()
+  // Count the scored points of each team
+  declare team_scores := 0[team_count]
+  static_assert(team_count = 2)
+  // For each athlete
+  for athlete_number := 0 to athlete_count do
+    // Give a point to the winner team in this round
+    if best_shots[0][athlete_number] > best_shots[1][athlete_number] then
+      ++team_scores[0]
+    else if best_shots[1][athlete_number] > best_shots[0][athlete_number] then
+      ++team_scores[1]
+    else
+      print "draw for round", athlete_number
+    end if
+  end for
+end procedure

@@ -5,6 +5,8 @@ APPNAME=$(shell basename $(shell pwd))
 APPARGS=10
 CFLAGS=-g -Wall -Wextra
 
+# Now the makefile is generic and it works for anotheer examples
+
 $(APPNAME): $(APPNAME).c
 	cc $(CFLAGS) $< -o $@ -pthread
 

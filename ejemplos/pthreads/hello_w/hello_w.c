@@ -9,13 +9,20 @@
 #include <unistd.h>
 
 /**
- * @brief ...
+ * @brief Print the rank from the threat
+ * 
+ * @param data Rank of the threat
  */
 void* greet(void* data);
+
+/**
+ * @brief ...
+ */
 int create_threads(uint64_t thread_count);
 
 // procedure main(argc, argv[])
 int main(int argc, char* argv[]) {
+// this little method show us the arguments that main received
 #if 0
   for (int index = 0; index < argc; ++index) {
     printf("argv[%d] = '%s'\n", index, argv[index]);
@@ -27,8 +34,10 @@ int main(int argc, char* argv[]) {
   // create thread_count as result of converting argv[1] to integer
   // thread_count := integer(argv[1])
   uint64_t thread_count = sysconf(_SC_NPROCESSORS_ONLN);
+  // we got the number from the terminal
   if (argc == 2) {
     if (sscanf(argv[1], "%" SCNu64, &thread_count) == 1) {
+    // this is to see if we have a valid entry
     } else {
       fprintf(stderr, "Error: invalid thread count\n");
       return 11;
@@ -44,6 +53,7 @@ int create_threads(uint64_t thread_count) {
   int error = EXIT_SUCCESS;
   // for thread_number := 0 to thread_count do
   pthread_t* threads = (pthread_t*) malloc(thread_count * sizeof(pthread_t));
+  // memory for the threat
   if (threads) {
     for (uint64_t thread_number = 0; thread_number < thread_count
         ; ++thread_number) {
@@ -65,6 +75,7 @@ int create_threads(uint64_t thread_count) {
         ; ++thread_number) {
       pthread_join(threads[thread_number], /*value_ptr*/ NULL);
     }
+    // free the memory of each thread
 
     free(threads);
   } else {
@@ -80,6 +91,7 @@ int create_threads(uint64_t thread_count) {
 void* greet(void* data) {
   // assert(data);
   const uint64_t rank = (uint64_t) data;
+  // this is the rank of the thread
   // print "Hello from secondary thread"
   printf("Hello from secondary thread %" PRIu64 "\n", rank);
   return NULL;

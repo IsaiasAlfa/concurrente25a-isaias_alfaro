@@ -1,12 +1,12 @@
 procedure main(argc, argv[])
   // create thread_count as result of converting argv[1] to integer
-  declare thread_count := integer(argv[1])
+  declare thread_count := integer(argv[1]) // How many threads we are gona use
   for thread_number := 0 to thread_count do
     create_thread(greet, thread_number)
-  end for
+  end for // for to crreate the threads
   print "Hello from main thread"
 end procedure
 
-procedure greet(thread_number)
+procedure greet(thread_number) // action of secundary threats
   print "Hello from secondary thread", thread_number
 end procedure

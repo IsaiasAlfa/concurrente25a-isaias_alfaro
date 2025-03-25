@@ -1,0 +1,94 @@
+= Glosario
+Isaías Alfaro Ugalde <isaias.alfaro@ucr.ac.cr>
+
+*1.Programación serial.*
+
+Tipo de programación que sigue una linea recta, no se puede avanzar a la segunda tarea sin antes terminar la primera.
+
+** Ejemplo
+* Escuela
+* Colegio
+
+*2.Programación concurrente.*
+
+Programación que no es serial.
+
+** Ejemplo
+* Se llevan cursos en un mismo ciclo lectivo.
+
+*3.Programación paralela.*
+
+Programación que ocurre en el mismo momento, de forma simultanea.
+
+** Ejemplo
+* Ver una película
+* Escuchar la película
+* Comer palomitas
+
+*4.Concurrencia de tareas.*
+
+Diferentes ejecutantes se encargan de diferentes asuntos.
+
+** Ejemplo
+** En una empresa
+* Contador
+* Recursos humanos
+* Informático
+
+*5.Paralelismo de datos.*
+
+Un proceso se divide en muchos "hilos" para aumentar la eficiencia de la tarea.
+
+** Ejemplo
+* Renderizado de una película animada en un clúster de computadoras.
+
+*6.Hilo de ejecución.*
+
+Secuencia de instrucciones que se puede ejecutar de forma independiente. 
+
+** Ejemplo
+** Cocina
+* El chef pone a cocinar carne.
+* El chef pone a cocinar pasta.
+El chef pone a hervir verduras.
+
+*7.Indeterminismo.*
+
+No se puede predecir como se ejecutan los "hilos", quien se ejecuta antes.
+
+** Ejemplo
+* El primer hilo logra cpu despues del segundo hilo y el tercero es el ultimo. 
+
+*8.Memoria privada y compartida.*
+
+*9.Espera activa.*
+
+*10.Condición de carrera.*
+
+*11.Control de concurrencia.*
+
+*12.Seguridad condicional.*
+
+*13.Exclusión mutua.*
+
+*14.Semáforo.*
+
+*15.Barrera.*
+
+*16.Variable de condición.*
+
+*17.Candado de lectura y escritura.*
+
+*18.Descomposición.*
+
+*19.Mapeo.*
+
+*20.Incremento de velocidad (speedup).*
+
+*21.Eficiencia.*
+
+*22.Comunicación punto a punto entre procesos.*
+
+*23.Comunicación colectiva entre procesos.*
+
+*24.Reducción.*

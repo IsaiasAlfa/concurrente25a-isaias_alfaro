@@ -1,4 +1,4 @@
-const team_count = 2
+const team_count = 2 
 const shot_count = 3
 
 procedure main(argc, argv[])  // referee
@@ -7,7 +7,7 @@ procedure main(argc, argv[])  // referee
   // Athlete count must be odd
   if athlete_count is odd then
     // Create a score board to record the best shots
-    shared best_shots := 0.0[team_count][athlete_count]
+    shared best_shots := array(team_count, array(athlete_count, 0.0))
     compete()
     print_result()
   else
@@ -16,12 +16,20 @@ procedure main(argc, argv[])  // referee
 end procedure
 
 procedure compete()
+  mutable threats_ids := array(team_count, array(athlete_count, threat))
   // For each team
   for team_number := 0 to team_count do
     // For each athlete
     for athlete_number := 0 to athlete_count do
       // Score the best shot this athlete reached
-      best_shots[team_number][athlete_number] := shot(team_number, athlete_number)
+      // Create a threat for each athlete
+      threats_ids[team_number][athlete_number] :=
+          Create_threat(shot, team_number, athlete_number)
+    end for
+  end for
+  for team_number := 0 to team_count do
+    for athlete_number := 0 to athlete_count do
+      join_threat(threat)
     end for
   end for
 end procedure
@@ -35,12 +43,13 @@ procedure shot(team_number, athlete_number)
     end if
   end for
   print team_number, ".", athlete_number, ": best shot put ", my_best_shot, "m"
-  return my_best_shot
+  best_shots[team_number][athlete_number] := shot(team_number, athlete_number)
+  // return my_best_shot
 end procedure
 
 procedure print_result()
   // Count the scored points of each team
-  declare team_scores := 0[team_count]
+  declare team_scores := array(team_count, 0)
   static_assert(team_count = 2)
   // For each athlete
   for athlete_number := 0 to athlete_count do
@@ -53,4 +62,6 @@ procedure print_result()
       print "draw for round", athlete_number
     end if
   end for
+  const winner = 1 if team_scores[0] > team_scores[1] else 2
+  print "result {team_scores[0]}:team_scores[1], tean {winner} wins"
 end procedure

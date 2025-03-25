@@ -1,4 +1,4 @@
-# Makefile v3.6.0 2024-Nov-07 Jeisson Hidalgo-Cespedes ECCI-UCR CC-BY 4.0
+# Makefile v3.7.0 2025-Mar-19 Jeisson Hidalgo-Cespedes ECCI-UCR CC-BY 4.0
 
 # VAR=value  ## Overrides a variable, e.g CC=mpicc DEFS=-DGUI. See helpvars
 CC=gcc#= C compiler
@@ -20,9 +20,8 @@ ARGS=#= Execution arguments, e.g: 'ARGS=100 "a text"'
 ARGSJR=-ea
 RUNPRE=#= Execution prefix e.g: for `time ./myapp` run `make RUNPRE=time`
 RUNSUF=#= Execution suffix e.g: for `./myapp |sort` run `make RUNSUF=|sort`
-# GITUSER=$(shell getent passwd "$USER" | cut -d: -f5 | cut -d, -f1)#= Your full name e.g: "Ana Soto"
-GITUSER=Isaias Alfaro
-GITEMAIL=isaias.alfaro@ucr.ac.cr
+GITUSER=$(shell getent passwd "$USER" | cut -d: -f5 | cut -d, -f1)#= Your full name e.g: "Ana Soto"
+GITEMAIL=
 GITTIME=10800#= Store git password in memory for this amount of seconds (default 3h)
 HOST=$(subst .local,,$(shell hostname))
 
@@ -121,6 +120,7 @@ tsan: FLAGS += -fsanitize=thread  ## Build for detecting thread errors, e.g race
 ubsan: FLAGS += -fsanitize=undefined  ## Build for detecting undefined behavior
 asan msan tsan ubsan: debug
 
+-include $(MAKFILE).mk
 -include *.mk $(DEPENDS)
 .SECONDEXPANSION:
 
@@ -171,10 +171,10 @@ exe/output%.txt: $(TESTS)/input%.txt $(TESTS)/output%.txt $$(wildcard $(TESTS)/a
 	-$(DIFF) $(word 2,$^) <($(call run_test,EXEARGS,$(word 3,$^))) ||:
 
 jar/output%.txt: $(TESTS)/input%.txt $(TESTS)/output%.txt
-	-$(DIFF) $(word 2,$^)) <($(call run_test,JARARGS,$(word 3,$^))) ||:
+	-$(DIFF) $(word 2,$^) <($(call run_test,JARARGS,$(word 3,$^))) ||:
 
 py3/output%.txt: $(TESTS)/input%.txt $(TESTS)/output%.txt
-	-$(DIFF) $(word 2,$^)) <($(call run_test,PY3ARGS,$(word 3,$^))) ||:
+	-$(DIFF) $(word 2,$^) <($(call run_test,PY3ARGS,$(word 3,$^))) ||:
 
 # <L>out  ## Generate test case output using language L: cpp|java|py
 cppout: $(TARGETS) $(OUTPUTX)
@@ -276,16 +276,23 @@ ifneq ($(SOURCEP),)
 	find $(SRC) -name '*.pyc' -exec rm -f {} \;
 endif
 
-# Install dependencies for Debian or RedHat based distros (pacman pending)
-DEPS=clang valgrind doxygen pipx python3-gpg checkstyle
-INSTDEPS=sudo apt install build-essential openjdk-17-jdk cpplint icdiff
-PIP=pipx
-ifeq (, $(shell which apt 2> /dev/null))
-	INSTDEPS=sudo dnf groupinstall 'Development Tools' && sudo dnf install java-17-openjdk && $(PIP) install icdiff && $(PIP) install cpplint
-endif # not an apt-based distribution, use dnf
+# Install dependencies for Debian or RedHat based distros and macOS
+ALLDEPS=checkstyle doxygen pipx
+LINDEPS=$(ALLDEPS) clang graphviz python3-gpg valgrind
+MACDEPS=$(ALLDEPS) cpplint icdiff openjdk
+ifeq (0, $(shell which brew > /dev/null 2>&1; echo $$?)) # macOS
+	INSDEPS=brew install $(MACDEPS)
+else ifeq (0, $(shell which dnf > /dev/null 2>&1; echo $$?)) # RedHat-based
+	INSDEPS=sudo dnf install @development-tools java-21-openjdk libasan libtsan libubsan $(LINDEPS)
+	PIPDEPS=&& pipx ensurepath && pipx install icdiff && pipx install cpplint
+else ifeq (0, $(shell which apt > /dev/null 2>&1; echo $$?)) # Debian-based
+	INSDEPS=sudo apt install build-essential cpplint icdiff openjdk-17-jdk $(LINDEPS)
+else
+	INSDEPS=@>&2 echo "ERROR: Package manager not supported"
+endif
 
-instdeps:  ## Install needed packages on Debian/RedHat-based distributions
-	$(INSTDEPS) $(DEPS) && $(PIP) ensurepath
+instdeps:  ## Install needed packages on macOS/Debian/RedHat-based distributions
+	$(INSDEPS) $(PIPDEPS)
 
 update:  ## Update this Makefile to latest version"
 	$(DOWN) $(MAKSITE)/Makefile > $(MAKFILE)

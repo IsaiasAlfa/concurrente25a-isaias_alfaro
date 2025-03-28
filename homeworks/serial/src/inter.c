@@ -119,10 +119,10 @@ void jobs_out_file(struct data_array *dat, struct heat **heat_data,
   time_t seconds = (plate_data->time * plate_data->report);
   if (format_time(seconds, time_file, 20) != NULL) {
     fprintf(job_out, "%s\t", dat[position].plate);
-    fprintf(job_out, "%.2f\t", plate_data->time);
-    fprintf(job_out, "%.2f\t", plate_data->material);
-    fprintf(job_out, "%.2f\t", plate_data->area);
-    fprintf(job_out, "%.2f\t", plate_data->epsilon);
+    fprintf(job_out, "%g\t", plate_data->time);
+    fprintf(job_out, "%g\t", plate_data->material);
+    fprintf(job_out, "%g\t", plate_data->area);
+    fprintf(job_out, "%g\t", plate_data->epsilon);
     fprintf(job_out, "%d\t", plate_data->report);
     fprintf(job_out, "%s\n", time_file);
   }

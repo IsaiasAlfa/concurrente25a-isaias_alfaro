@@ -12,7 +12,10 @@ doc/
 tests/
 
 # Ignorar archivos binarios generados (por ejemplo, archivos temporales)
-.bin/
+*.bin
 
 # Ignorar archivos .tsv (archivos de texto delimitados por tabuladores)
 *.tsv
+
+# Ignorar archivos :Zone.Identifier
+*:Zone.Identifier

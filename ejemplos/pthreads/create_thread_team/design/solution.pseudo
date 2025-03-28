@@ -16,25 +16,13 @@ procedure main(argc, argv[])  // referee
 end procedure
 
 procedure compete()
-  mutable threats_ids := array(team_count, array(athlete_count, threat))
-  // For each team
-  for team_number := 0 to team_count do
-    // For each athlete
-    for athlete_number := 0 to athlete_count do
-      // Score the best shot this athlete reached
-      // Create a threat for each athlete
-      threats_ids[team_number][athlete_number] :=
-          Create_threat(shot, team_number, athlete_number)
-    end for
-  end for
-  for team_number := 0 to team_count do
-    for athlete_number := 0 to athlete_count do
-      join_threat(threat)
-    end for
-  end for
+  mutable teams := Create_threads(team_count * athlete_count, shot)
+  join_thread(teams)
 end procedure
 
-procedure shot(team_number, athlete_number)
+procedure shot(thread_number)
+  const team_number = div(thread_number, athlete_count)
+  const athlete_number = mod(thread_number, athlete_count)
   declare my_best_shot := 0.0
   for shot_number := 0 to shot_count do
     shot_distance := random(0.0, 25.0)

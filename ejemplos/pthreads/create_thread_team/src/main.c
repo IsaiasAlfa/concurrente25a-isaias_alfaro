@@ -12,10 +12,16 @@
 #define shot_count 3
 
 typedef struct {
-  size_t team_number;
-  size_t athlete_number;
+  size_t athlete_count;
   double** best_shots;
-} race_data;
+} shared_data_t;
+
+typedef struct {
+  pthread_t thread_id;
+  size_t thread_number;
+  size_t thread_count;
+  void* shared_data;
+} private_data_t;
 
 void compete(const size_t athlete_count, double** best_shots);
 void* athlete(void* data);
@@ -24,6 +30,9 @@ void destroy_double_matrix(double** matrix, size_t rows);
 double shot(const size_t team_number, const size_t athlete_number);
 double random_f(const double min, const double max);
 void print_result(const size_t athlete_count, double** best_shots);
+private_data_t* create_threads(const size_t count, void*(*routine)(void*),
+    void* data);
+int join_threads(const size_t count, private_data_t* private_data);
 
 int main(int argc, char* argv[]) {
   // Get the number of athletes in each team
@@ -51,41 +60,21 @@ int main(int argc, char* argv[]) {
 }
 
 void compete(const size_t athlete_count, double** best_shots) {
-  pthread_t** threat_ids = calloc(team_count, sizeof(pthread_t*));
-  assert(threat_ids);
-  race_data** private_data = calloc(team_count, sizeof(race_data*));
-  assert(private_data);
-  // For each team
-  for (size_t team_number = 0; team_number < team_count; ++team_number) {
-    // For each athlete
-    for (size_t athlete_number = 0; athlete_number < athlete_count;
-        ++athlete_number) {
-      // Score the best shot this athlete reached
-      private_data[team_number][athlete_number].team_number = team_number;
-      private_data[team_number][athlete_number].athlete_number = athlete_number;
-      private_data[team_number][athlete_number].best_shots = best_shots;
-      pthread_create(&threat_ids[team_number][athlete_number], NULL, athlete,
-          &private_data[team_number][athlete_number]);
-    }
-  }
-  for (size_t team_number = 0; team_number < team_count; ++team_number) {
-    for (size_t athlete_number = 0; athlete_number < athlete_count;
-          ++athlete_number) {
-      pthread_join(threat_ids[team_number][athlete_number], NULL);
-    }
-    free(private_data[team_number]);
-    free(threat_ids[team_number]);
-  }
-  free(private_data);
-  free(threat_ids);
+  const size_t thread_count = team_count * athlete_count;
+  shared_data_t* shared_data = {athlete_count, best_shots};
+  private_data_t* teams = create_threads(thread_count, athlete, &shared_data);
+  join_threads(thread_count, teams);
 }
 
 // puente para no sobreescribir funcion shot
 void* athlete(void* data) {
-  race_data* private_data = (race_data*)data;
-  const size_t team_number = private_data->team_number;
-  const size_t athlete_number = private_data->athlete_number;
-  private_data->best_shots[team_number][athlete_number] =
+  private_data_t* private_data = (private_data_t*)data;
+  shared_data_t* shared_data = (shared_data_t*)private_data->shared_data;
+  const size_t athlete_count = shared_data->athlete_count;
+  const size_t thread_number = private_data->thread_number;
+  const size_t team_number = thread_number / athlete_count;
+  const size_t athlete_number = thread_number % athlete_count;
+  shared_data->best_shots[team_number][athlete_number] =
       shot(team_number, athlete_number);
   return NULL;
 }
@@ -151,4 +140,36 @@ void destroy_double_matrix(double** matrix, size_t rows) {
     }
     free(matrix);
   }
+}
+
+private_data_t* create_threads(const size_t count, void*(*routine)(void*),
+    void* data) {
+  private_data_t* private_data = calloc(count, sizeof(private_data_t));
+  if (private_data) {
+    for (size_t index = 0; index < count; ++index) {
+      private_data[index].thread_number = index;
+      private_data[index].thread_count = count;
+      private_data[index].shared_data = data;
+      if (pthread_create(&private_data[index].thread_id, NULL, routine,
+        &private_data[index]) != 0) {
+        fprintf(stderr, "error: could not create thread %zu\n", index);
+        join_threads(index, private_data);
+        return NULL;
+      }
+    }
+  }
+  return private_data;
+}
+
+int join_threads(const size_t count, private_data_t* private_data) {
+  int error_count = 0;
+  for (size_t index = 0; index < count; ++index) {
+    const int error = pthread_join(private_data[index].thread_id, NULL);
+    if (error) {
+      fprintf(stderr, "error: could not join thread %zu\n", index);
+      ++error_count;
+    }
+  }
+  free(private_data);
+  return error_count;
 }

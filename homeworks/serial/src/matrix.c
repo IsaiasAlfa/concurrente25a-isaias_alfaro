@@ -5,7 +5,7 @@
 
 void make_data(const char *filename, char job[]) {
   struct data_job *plate_data = malloc(sizeof(struct data_job));
-  struct data_array *dat = malloc(sizeof(struct data_array) * 20);
+  struct data_array *dat = malloc(sizeof(struct data_array) * 40);
 
   int cont_array = 0;
   if (plate_data == NULL || dat == NULL) {
@@ -48,7 +48,7 @@ void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
   double cycles = 0;
   double auxiliar = 0;
   double rest_heat = 0;
-  plate_data->balance = 0;
+  plate_data->balance = 0;  // Inicializamos balance a 0 (no equilibrado)
 
   double burn = (plate_data->time * plate_data->material) /
       (plate_data->area * plate_data->area);
@@ -59,24 +59,29 @@ void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
   }
 
   while (plate_data->balance != 1) {
-    // actualizar current heat
     plate_data->balance = 1;
+
+    // Iterar sobre las celdas de la matriz, excepto las fronteras
     for (uint64_t i = 1; i < plate_data->R - 1; i++) {
       for (uint64_t j = 1; j < plate_data->C - 1; j++) {
+        // Calcular el cambio en el calor
         auxiliar = burn * (heat_dat[i-1][j].past_warm +
             heat_dat[i][j-1].past_warm +
             heat_dat[i][j+1].past_warm +
-            heat_dat[i+1][j].past_warm -
-            (4 * heat_dat[i][j].past_warm));
+            heat_dat[i+1][j].past_warm - (4 * heat_dat[i][j].past_warm));
         heat_dat[i][j].current_warm = heat_dat[i][j].current_warm + auxiliar;
 
+        // resta del calor para epsilon
         rest_heat = heat_dat[i][j].current_warm - heat_dat[i][j].past_warm;
-        if (plate_data->epsilon < rest_heat) {
-          plate_data->balance = 0;
+
+        // Verificar si el sistema aún no está equilibrado
+        if (fabs(rest_heat) > plate_data->epsilon) {
+          plate_data->balance = 0;  // El sistema no está equilibrado, continuar
         }
       }
     }
-    // actualizar past heat
+
+    // Actualizar los valores de `past_warm` y continuar el ciclo
     if (plate_data->balance == 0) {
       for (uint64_t i = 1; i < plate_data->R - 1; i++) {
         for (uint64_t j = 1; j < plate_data->C - 1; j++) {
@@ -84,10 +89,12 @@ void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
         }
       }
     }
-  cycles = cycles + 1;
+    cycles++;  // Incrementamos el contador de ciclos
   }
   plate_data->report = cycles;
 }
+
+
 
 void make_free(struct data_job *plate_data, struct data_array *dat) {
   free(plate_data);

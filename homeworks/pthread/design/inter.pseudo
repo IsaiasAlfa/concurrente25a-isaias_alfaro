@@ -1,0 +1,74 @@
+Función jobs_find_file(nombre_archivo, dat, cont_array):
+    Asegurarse de que nombre_archivo no sea NULL
+    // Intentar abrir el archivo en modo lectura
+    Abrir archivo con nombre_archivo en modo lectura (r)
+    Si el archivo se abre exitosamente:
+        Llamar a jobs_charge_data con el archivo, dat y cont_array
+        Llamar a jobs_close_file con el archivo
+    Sino:
+        Mostrar mensaje de error "No se pudo abrir el archivo."
+
+
+Función jobs_charge_data(archivo, dat, cont):
+    numEntries <- 0  // Contador de entradas leídas
+    buffer <- buffer de 255 caracteres
+    Mientras leer línea del archivo en buffer no sea NULL y numEntries < 20:
+        Leer datos de buffer en dat[numEntries] (plate, value_time, value_material, value_area, value_epsilon)
+        Incrementar numEntries
+    Establecer *cont con el valor de numEntries
+
+
+Función plate_charge_RC(plate_data, posición, dat):
+    time <- dat[posición].value_time
+    material <- dat[posición].value_material
+    area <- dat[posición].value_area
+    epsilon <- dat[posición].value_epsilon
+
+    RB <- 0  // Número de filas
+    CB <- 0  // Número de columnas
+
+    Construir file_path usando "tests/" y el nombre de la placa en dat[posición].plate
+    Abrir archivo con file_path en modo binario (rb)
+    Si el archivo se abre exitosamente:
+        Leer número de filas (RB) del archivo
+        Leer número de columnas (CB) del archivo
+        Establecer plate_data->R con RB
+        Establecer plate_data->C con CB
+        Establecer plate_data->time con time
+        Establecer plate_data->material con material
+        Establecer plate_data->area con area
+        Establecer plate_data->epsilon con epsilon
+        Cerrar el archivo
+    Sino:
+        Mostrar mensaje de error "Error al abrir el archivo"
+
+
+Función plate_charge_heat(posición, dat, heat_data):
+    auxiliar <- 0
+    Construir file_path usando "tests/" y el nombre de la placa en dat[posición].plate
+    Abrir archivo con file_path en modo binario (rb)
+    Si el archivo se abre exitosamente:
+        Leer número de filas (R) del archivo
+        Leer número de columnas (C) del archivo
+        Para cada celda en la matriz (R x C):
+            Calcular mov como índice de celda (i * C + j)
+            Leer valor de calor del archivo en auxiliar
+            Establecer heat_data[mov].past_warm y heat_data[mov].current_warm con auxiliar
+        Cerrar el archivo
+    Sino:
+        Mostrar mensaje de error "Error al abrir el archivo"
+
+
+Función print_data_array(dat, tamaño):
+    Para i desde 0 hasta tamaño - 1:
+        Mostrar "Entry i:"
+        Mostrar dat[i].plate
+        Mostrar dat[i].value_time
+        Mostrar dat[i].value_material
+        Mostrar dat[i].value_area
+        Mostrar dat[i].value_epsilon
+        Mostrar nueva línea
+
+
+Función jobs_close_file(archivo):
+    Cerrar archivo

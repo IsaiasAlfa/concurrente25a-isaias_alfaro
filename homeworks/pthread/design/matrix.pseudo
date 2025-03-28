@@ -1,0 +1,151 @@
+// Copyright 2024 Isaias Alfaro Ugalde
+
+// Definición de variables
+mutex balance_mutex
+condición balance_cond
+
+// Función principal para preparar los datos
+función make_data(filename, job, hilos):
+    // Asignar memoria para datos
+    plate_data = asignar memoria para data_job
+    dat = asignar memoria para data_array con tamaño 20
+
+    si plate_data o dat es NULL:
+        // Manejar error de asignación de memoria
+        imprimir "Error al asignar memoria"
+        liberar memoria de plate_data y dat
+        salir
+
+    // Buscar y cargar datos desde el archivo
+    jobs_find_file(filename, dat, cont_array)
+    // Procesar la matriz
+    make_matrix(plate_data, dat, cont_array, job, hilos)
+
+// Función para crear y procesar la matriz
+función make_matrix(plate_data, dat, cont_array, job, hilos):
+    position = cont_array
+    job_filename = concatenar job con ".tsv"
+    job_file = abrir archivo job_filename para escritura
+
+    para cada i desde 0 hasta position - 1:
+        // Cargar datos en plate_data
+        plate_charge_RC(plate_data, i, dat)
+        rows = plate_data.R
+        cols = plate_data.C
+        heat_data = crear_matriz(rows, cols)
+
+        si heat_data es NULL:
+            imprimir "Error al asignar memoria"
+            salir
+
+        // Cargar datos de calor
+        plate_charge_heat(i, dat, heat_data)
+        // Procesar la matriz de calor
+        make_heat(plate_data, heat_data, hilos)
+        // Guardar resultados en archivo
+        jobs_out_file(dat, heat_data, plate_data, job_file, i)
+        // Liberar memoria de la matriz de calor
+        liberar_matrix(heat_data, rows)
+
+    cerrar archivo job_file
+    liberar memoria de plate_data y dat
+
+// Función para procesar la matriz de calor usando múltiples hilos
+función make_heat(plate_data, heat_dat, hilos):
+    si plate_data.R <= 1 o plate_data.C <= 1:
+        imprimir "Error: dimensiones de la matriz no válidas"
+        salir
+
+    si hilos <= 0:
+        imprimir "Error: el número de hilos debe ser mayor que 0"
+        salir
+
+    // Inicializar mutex y condición
+    inicializar balance_mutex
+    inicializar balance_cond
+
+    // Asignar memoria para los hilos
+    threads = asignar memoria para hilos de pthread
+    si threads es NULL:
+        manejar error y salir
+
+    // Asignar memoria para los argumentos de los hilos
+    hilo_args = asignar memoria para hilo_data
+    si hilo_args es NULL:
+        manejar error y salir
+
+    burn = calcular tasa de quemado
+
+    // Crear hilos
+    para cada i desde 0 hasta hilos - 1:
+        hilo_args[i].plate_data = plate_data
+        hilo_args[i].heat_dat = heat_dat
+        hilo_args[i].hilo_id = i
+        hilo_args[i].total_hilos = hilos
+        hilo_args[i].burn = burn
+        crear hilo con make_heat_hilos y pasar hilo_args[i]
+        si error al crear hilo:
+            manejar error y salir
+
+    // Unir hilos
+    para cada i desde 0 hasta hilos - 1:
+        unir hilo
+
+    // Destruir mutex y condición
+    destruir balance_cond
+    destruir balance_mutex
+
+    // Liberar memoria
+    liberar memoria de hilo_args y threads
+
+// Función para liberar memoria de la matriz
+función liberar_matrix(matrix, filas):
+    para cada i desde 0 hasta filas - 1:
+        liberar memoria de matrix[i]
+    liberar memoria de matrix
+
+// Función para procesar el cálculo de calor en hilos
+función make_heat_hilos(arg):
+    data = convertir arg a hilo_data
+    cols_por_hilo = calcular columnas por hilo
+    inicio_columna = calcular columna de inicio
+    inicio_fila = calcular fila de inicio
+    auxiliar = 0
+    rest_heat = 0
+
+    mientras balance no es 1:
+        bloquear balance_mutex
+        balance = 1
+        notificar todos los hilos
+        desbloquear balance_mutex
+
+        // Actualizar calor actual en el rango de columnas asignado
+        para cada i desde 0 hasta cols_por_hilo - 1:
+            si fila es mayor que límite:
+                ajustar columna y fila de inicio
+            calcular nuevo valor de calor
+            actualizar valor de calor actual
+            si diferencia en calor es mayor que epsilon:
+                bloquear balance_mutex
+                balance = 0
+                notificar todos los hilos
+                desbloquear balance_mutex
+
+            ajustar columna
+
+        bloquear balance_mutex
+        mientras balance es 0:
+            esperar en balance_cond
+        desbloquear balance_mutex
+
+        imprimir columnas y filas actuales
+        // Actualizar calor pasado si balance es 0
+        si balance es 0:
+            para cada i desde 0 hasta cols_por_hilo - 1:
+                actualizar calor pasado
+
+        // Incrementar el ciclo
+        si hilo_id es 0:
+            incrementar reporte
+
+    retornar NULL

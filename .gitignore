@@ -1,4 +1,18 @@
-.vscode
-bin
-build
-doc
+# Ignorar la carpeta de configuración de VS Code
+.vscode/
+
+# Ignorar carpetas de binarios y construcción
+bin/
+build/
+
+# Ignorar la carpeta de documentación (si se generan archivos aquí)
+doc/
+
+# Ignorar carpeta de pruebas (si las pruebas generan archivos aquí)
+tests/
+
+# Ignorar archivos binarios generados (por ejemplo, archivos temporales)
+.bin/
+
+# Ignorar archivos .tsv (archivos de texto delimitados por tabuladores)
+*.tsv

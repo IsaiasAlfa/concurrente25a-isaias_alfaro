@@ -51,9 +51,10 @@ int main(int argc, char* argv[]) {
 }
 
 void compete(const size_t athlete_count, double** best_shots) {
+  pthread_t** threat_ids = calloc(team_count, sizeof(pthread_t*));
+  assert(threat_ids);
   race_data** private_data = calloc(team_count, sizeof(race_data*));
   assert(private_data);
-  pthread_t** threat_ids = calloc(team_count, sizeof(pthread_t*));
   // For each team
   for (size_t team_number = 0; team_number < team_count; ++team_number) {
     private_data[team_number] = calloc(athlete_count, sizeof(race_data));
@@ -69,8 +70,19 @@ void compete(const size_t athlete_count, double** best_shots) {
           &private_data[team_number][athlete_number]);
     }
   }
+  for (size_t team_number = 0; team_number < team_count; ++team_number) {
+    for (size_t athlete_number = 0; athlete_number < athlete_count;
+          ++athlete_number) {
+      pthread_join(threat_ids[team_number][athlete_number], NULL);
+    }
+    free(private_data[team_number]);
+    free(threat_ids[team_number]);
+  }
+  free(private_data);
+  free(threat_ids);
 }
 
+// puente para no sobreescribir funcion shot
 void* athlete(void* data) {
   race_data* private_data = (race_data*)data;
   const size_t team_number = private_data->team_number;

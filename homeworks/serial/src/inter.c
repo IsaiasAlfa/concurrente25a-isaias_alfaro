@@ -18,7 +18,7 @@ void jobs_find_file(const char *filename, struct data_array *dat,
 void jobs_charge_data(FILE *file, struct data_array *dat, int *cont) {
   int numEntries = 0;  // Contador de entradas leídas
   char buffer[255];  // Buffer para almacenar cada línea leída del archivo
-  while (fgets(buffer, sizeof(buffer), file) != NULL && numEntries < 20) {
+  while (fgets(buffer, sizeof(buffer), file) != NULL && numEntries < 40) {
     sscanf(buffer, "%s %lf %lf %lf %lf",
         dat[numEntries].plate, &dat[numEntries].value_time,
         &dat[numEntries].value_material, &dat[numEntries].value_area,

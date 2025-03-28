@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <matrix.h>
-#include <inter.h>
 
 int main() {
   char filename[100];

@@ -1,5 +1,26 @@
-= Glosario
-Isaías Alfaro Ugalde <isaias.alfaro@ucr.ac.cr>
+= Paralela25 Isaías Alfaro Ugalde <isaias.alfaro@ucr.ac.cr>
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+== Pthreads
+
+
+[%autowidth]
+|===
+|# |ID |Tipo |Descripcion
+|1 |link:pthreads/invert[invert] |Ejemplo de clase |Programa serial que invierte numeros enteros dados en la entrada estandar
+|1 |link:pthreads/invert[invert] |Ejemplo de clase |Programa serial que invierte numeros enteros dados en la entrada estandar
+|===
+
+== Tareas
+
+== Glosario
+
 
 *1.Programación serial.*
 

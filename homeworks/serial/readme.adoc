@@ -1,0 +1,65 @@
+= Serial_heat_transfer
+
+*Isaías Alfaro Ugalde <isaias.alfaro@ucr.ac.cr>*
+
+---
+
+:experimental:
+:nofooter:
+:source-highlighter: highlight.js
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+== Problema
+
+image::./design/lamina caliente.png[]
+
+El problema se basa en simular con cierta exactitud cómo se comporta el calor en una lámina. Esto se logra mediante una simulación de inyeción de calor en la propia lámina. Luego, la simulación se ejecuta durante un tiempo determinado, hasta alcanzar un punto de equilibrio, donde el cambio de temperatura es lo suficientemente bajo para considerarse estable.
+
+=== Solucion
+
+La solución consta de tres partes, los cuales son:
+
+* *Matriz*: Al simular una lámina, buscamos recrearla en un programa con cierta exactitud respecto a una lámina en la vida real. Para ello, se optó por una matriz en la que inyectamos calor en los bordes durante la simulación, mientras que en las celdas interiores calculamos progresivamente la distribución del calor mediante una fórmula específica. Para un mayor entendimiento de la fórmula, consulta la sección "https://jeisson.ecci.ucr.ac.cr/concurrente/2025a/tareas/#problem_statement[Transferencia de calor]".
+
+* *Variables*: El programa es susceptible a muchas variables durante el proceso, con el fin de lograr una simulación lo más realista posible. Entre estas variables se encuentra el material de la lámina, cuya difusividad térmica determina qué tan buen conductor de calor es. Luego, el tamaño de la lámina influye en el tiempo necesario para alcanzar el equilibrio térmico: cuanto más grande o más pequeña sea, el proceso tomará una duración diferente. Por último, el intervalo de tiempo define la frecuencia con la que se analiza la distribución del calor en la lámina para determinar si ha alcanzado el equilibrio. 
+
+* *Equilibrio*: Esta es una de las partes más importantes de la simulación, ya que nos indica en qué momento debemos detenerla. El punto de equilibrio en la lámina se determina mediante una comparación con un valor específico: la transferencia de calor debe mantenerse por encima de este valor para que siga siendo significativa dentro de la simulación. Por ello, es fundamental tener en cuenta esta variable.
+
+== Manual de usuario
+
+=== Creacion del programa
+
+Para creacion de este programa se utiliza un makefile, esto agiliza mucho el proceso. Los pasos a seguir son:
+
+. Abrir una terminal y ubicarse en la carpeta llamada homeworks/serial.
+. En esta terminal se tiene que escribir el siguiente comando "make".
+. Este comando va a construir por completo la solución de la tarea.
+
+=== Uso del programa
+
+Para el uso del programa, primero se recomienda hacer la creacion del mismo pero no es obligatorio. Los pasos a seguir son:
+
+. En la misma terminal de creacion, se tiene que escribir el siguiente comando "make run".
+. Este comando va a compilar y ejecutar la solución de la tarea. 
+. En este paso le va a solicitar una dirección de un documento.
+.. Debe darle la ruta del archivo, por favor asegúrese que el programa pueda acceder al mismo.
+.. El programa solo acepta archivos de nombre jobxxx.txt para su correcta ejecución.
+
+== Resultado del programa
+
+El programa luego de su finalización va ha haber creado una lista de archivos. Estos son de la siguiente forma:
+
+jobxxx.tsv :: Este archivo de reporte indicará la lámina original que se utilizó, el tiempo transcurrido, el material, las dimensiones, el punto de equilibrio por alcanzar y, por último, cuántas veces se realizó la simulación para llegar al punto de equilibrio.
+
+platexxx-x :: Este archivo corresponde a la lámina final luego de la simulación. Contiene la distribución del calor alcanzada durante la fase de simulación. Su propósito es almacenar esta información para su uso en el futuro. El nombre del archivo se forma a partir de la lámina original utilizada y la cantidad de estados que se alcanzaron hasta llegar al punto de equilibrio.
+
+=== Ejemplo de ejecución
+
+[source, terminal]
+
+Ingresa el nombre del archivo: tests/job001.txt
+Nombre del archivo ingresado: job001
+

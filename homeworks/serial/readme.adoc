@@ -14,7 +14,7 @@
 
 == Problema
 
-image::./design/lamina caliente.png[]
+image::./design/images/lamina caliente.png[]
 
 El problema se basa en simular con cierta exactitud cómo se comporta el calor en una lámina. Esto se logra mediante una simulación de inyeción de calor en la propia lámina. Luego, la simulación se ejecuta durante un tiempo determinado, hasta alcanzar un punto de equilibrio, donde el cambio de temperatura es lo suficientemente bajo para considerarse estable.
 

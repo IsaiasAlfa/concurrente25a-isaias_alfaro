@@ -2,6 +2,7 @@
 
 #define _XOPEN_SOURCE 500
 #define _POSIX_C_SOURCE 199506L
+// #define RANDOM_SLEEP
 
 #include <assert.h>
 #include <inttypes.h>
@@ -16,9 +17,11 @@
 typedef struct shared_data {
   uint64_t next_thread;
   uint64_t thread_count;
+  useconds_t max_delay;
 } shared_data_t;
 
 // thread_private_data_t
+// datos prrivados van en parametro pseudo
 typedef struct private_data {
   uint64_t thread_number;  // rank
   shared_data_t* shared_data;
@@ -36,18 +39,31 @@ int main(int argc, char* argv[]) {
   // create thread_count as result of converting argv[1] to integer
   // thread_count := integer(argv[1])
   uint64_t thread_count = sysconf(_SC_NPROCESSORS_ONLN);
-  if (argc == 2) {
+  useconds_t max_delay = 0;
+  if (argc == 3) {
+    // recordar usar programacion generica "C++"
     if (sscanf(argv[1], "%" SCNu64, &thread_count) == 1) {
     } else {
       fprintf(stderr, "Error: invalid thread count\n");
       return 11;
     }
+    if (sscanf(argv[2], "%" SCNu32, &max_delay) == 1) {
+    } else {
+      fprintf(stderr, "Error: invalid max delay\n");
+      return 14;
+    }
+  } else {
+    fprintf(stderr, "Usage delay_busy_wait threads microseconds_delay\n");
+    return 13;
   }
 
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
     shared_data->next_thread = 0;
     shared_data->thread_count = thread_count;
+    shared_data->max_delay = max_delay;
+
+    srand48(time(NULL) + clock());
 
     struct timespec start_time, finish_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
@@ -119,7 +135,13 @@ void* greet(void* data) {
 
   // Wait until it is my turn
   while (shared_data->next_thread < private_data->thread_number) {
-    // busy-waiting
+    // delay busy-waiting
+#ifdef RANDOM_SLEEP
+    const useconds_t my_delay = lrand48() % shared_data->max_delay;
+    usleep(my_delay);
+#else
+    usleep(shared_data->max_delay);
+#endif
   }  // end while
 
   // print "Hello from secondary thread"

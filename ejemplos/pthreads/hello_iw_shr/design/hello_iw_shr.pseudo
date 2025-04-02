@@ -1,6 +1,9 @@
 procedure main(argc, argv[])
   // create thread_count as result of converting argv[1] to integer
+  // marca shared es que va a compartir su variable con sus hilos hijos
+  // trhead_count ahora es compartida por todos los hilos
   shared thread_count := integer(argv[1])
+  // variable local dato privado del hilo
   for thread_number := 0 to thread_count do
     create_thread(greet, thread_number) // thread team
   end for

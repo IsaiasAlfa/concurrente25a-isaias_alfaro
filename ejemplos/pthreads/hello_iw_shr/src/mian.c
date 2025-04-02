@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 // thread_shared_data_t
+// aqui se escribe todo lo que todos los hilos acceden
 typedef struct shared_data {
   uint64_t thread_count;
 } shared_data_t;
@@ -17,6 +18,7 @@ typedef struct shared_data {
 // thread_private_data_t
 typedef struct private_data {
   uint64_t thread_number;  // rank
+  // puntero a los datos compartidos
   shared_data_t* shared_data;
 } private_data_t;
 
@@ -48,6 +50,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  // no se sabe que tanto aumentan los datos
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
     shared_data->thread_count = thread_count;
@@ -71,9 +74,11 @@ int main(int argc, char* argv[]) {
   return error;
 }  // end procedure
 
+// recibo la cantidad de hilos creadas por puntero
 int create_threads(shared_data_t* shared_data) {
   int error = EXIT_SUCCESS;
   // for thread_number := 0 to thread_count do
+  // cambia a sacar las variables del registro compartido
   pthread_t* threads = (pthread_t*)
     malloc(shared_data->thread_count * sizeof(pthread_t));
   private_data_t* private_data = (private_data_t*)

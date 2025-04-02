@@ -57,6 +57,10 @@ void compete(const size_t athlete_count, double** best_shots) {
   assert(private_data);
   // For each team
   for (size_t team_number = 0; team_number < team_count; ++team_number) {
+    threat_ids[team_number] = calloc(athlete_count, sizeof(pthread_t));
+    assert(threat_ids[team_number]);
+    private_data[team_number] = calloc(athlete_count, sizeof(race_data));
+    assert(private_data[team_number]);
     // For each athlete
     for (size_t athlete_number = 0; athlete_number < athlete_count;
         ++athlete_number) {

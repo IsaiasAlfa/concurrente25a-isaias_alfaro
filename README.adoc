@@ -13,11 +13,26 @@
 [%autowidth]
 |===
 |# |ID |Tipo |Descripcion
-|1 |link:pthreads/invert[invert] |Ejemplo de clase |Programa serial que invierte numeros enteros dados en la entrada estandar
-|1 |link:pthreads/invert[invert] |Ejemplo de clase |Programa serial que invierte numeros enteros dados en la entrada estandar
+|1 |link:ejemplos/pthreads/hello[hello] |Ejemplo comentado |Programa que imprime un saludo desde un hilo secundario.
+|2 |link:ejemplos/pthreads/recursive_hello[recursive_hello] |Extraclase | Programa que imprime un saludo desde el ultimo hilo hasta el primero.
+|3 |link:ejemplos/pthreads/hello_w[hello_w] |Ejemplo comentado |Programa en la cual una cantidad de hilos indeterminada imprime un saludo.
+|4 |link:ejemplos/pthreads/team_shot_put[team_shot_put] |Ejemplo de clase |Programa que enfrenta dos equipos de hilos en una competencia de tiro.
+|5 |link:ejemplos/pthreads/create_thread_team[create_thread_team] |Ejemplo de clase |Programa que crea equipos de hilos para distintas tareas, en este caso enfrentarlos en la competicia de tiro.
+|6 |link:ejemplos/pthreads/hello_iw_pri[hello_iw_pri] |Ejemplo comentado |Programa que crea hilos con memoria privada que imprimen un saludo.
+|7 |link:ejemplos/pthreads/hello_iw_shr[hello_iw_shr] |Ejemplo comentado |Programa que crea hilos con memoria privada y compartida que imprimen un saludo.
+|8 |link:ejemplos/pthreads/hello_order_busywait[hello_order_busywait] |Ejemplo comentado |Programa que imprime un saludo  desde un hilo usando espera activa.
+|9 |link:ejemplos/pthreads/delayed_busy_wait[delayed_busy_wait] |Ejemplo de clase |Programa que imprime un saludo desde un hilo con espera activa elegida por el usuario.
+|10 |link:ejemplos/pthreads/hello_order_semaphor[hello_order_semaphor] |Ejemplo de clase |Programa que imprime un saludo desde un hilo en orden controlado por semaforos.
+|11 |link:ejemplos/pthreads/hello_order_cond_safe[hello_order_cond_safe] |Ejemplo de clase |Programa que imprime un saludo desde un hilo en orden controlado por seguridad condicional.
 |===
 
 == Tareas
+
+[%autowidth]
+|===
+|# |ID |Descripcion 
+|1 |link:homeworks/serial[serial_heat_transfer] | Tarea serial que simula la transferencia de calor en una lamina de un material en específico.
+|===
 
 == Glosario
 
@@ -82,7 +97,17 @@ No se puede predecir como se ejecutan los "hilos", quien se ejecuta antes.
 
 *8.Memoria privada y compartida.*
 
+Memoria privada es la memoria que posee cada hilo y solo el puede acceder a ella. Véase las variables locales.
+
+Memoria compartida es la memoria que todos los hilos heredan de el hilo que los creó, todos tienen el acceso a esta memoria
+Se puede enviar cada memoria por structs y punteros a estos.
+
 *9.Espera activa.*
+
+La espera activa ocurre cuando un hilo se mantiene en ejecución sin hacer trabajo útil, esperando que se cumpla una condición. Esto se considera una mala práctica porque consume recursos de CPU innecesariamente.
+
+** Ejemplo
+* Un while que deja a los hilos esperando hasta que cumplan una condición puesta por otro hilo.
 
 *10.Condición de carrera.*
 

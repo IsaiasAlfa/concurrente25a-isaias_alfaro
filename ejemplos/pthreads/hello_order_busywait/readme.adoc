@@ -1,0 +1,44 @@
+= Hola ordenado con espera
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
+Haga que los threads saluden siempre en orden. Es decir, si se crean w threads, la salida sea siempre en orden
+
+[source, terminal]
+
+Hello from thread 0 of w
+Hello from thread 1 of w
+Hello from thread 2 of w
+...
+Hello from thread w of w
+
+
+Utilice espera activa como mecanismo de sincronización (control de concurrencia).
+
+Ejecute varias veces su solución de hello_order_busywait con la cantidad máxima de threads que el su sistema operativo le permite. ¿Es consistente la duración de su solución con espera activa?
+
+*Respuesta:* La duracion de la solucion no es consistente. 
+
+Describa el comportamiento del programa. Indique en qué condiciones sería apremiante utilizar espera activa, o en caso de no haberlas, sugiera soluciones alternativas.
+
+*Respuesta:* El programa comienza a imprimir en orden los hilos, existe indeterminismo con el hilo principal al no tener la espera activa. 
+
+[source, terminal]
+
+Hello from secondary thread 0 of 8
+Hello from secondary thread 1 of 8
+Hello from secondary thread 2 of 8
+Hello from secondary thread 3 of 8
+Hello from secondary thread 4 of 8
+Hello from secondary thread 5 of 8
+Hello from secondary thread 6 of 8
+Hello from main thread
+Hello from secondary thread 7 of 8
+Execution time: 0.001755261s
+
+El problema de la espera activa es el abuso de la CPU, al esperar le quita los recursos a otros programas y las otras aplicaciones pierden su hilo de ejecucion. No se debe utilizar nunca.
+Unsa solucion es espera pasiva, estar esperando para ejecutarse pero no en la CPU, deja que la compu acceda a sus recursos y cuando ya puede ejecutarse lo hace. 

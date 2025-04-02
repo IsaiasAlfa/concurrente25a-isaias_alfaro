@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 
 void compete(const size_t athlete_count, double** best_shots) {
   const size_t thread_count = team_count * athlete_count;
-  shared_data_t* shared_data = {athlete_count, best_shots};
+  shared_data_t shared_data = {athlete_count, best_shots};
   private_data_t* teams = create_threads(thread_count, athlete, &shared_data);
   join_threads(thread_count, teams);
 }

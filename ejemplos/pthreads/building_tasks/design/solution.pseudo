@@ -1,6 +1,21 @@
 procedure main(argc, argv[])
   shared max_duration := integer(argv[1]) // microseconds
-  declare team := reserve_threads(11)
+  // aviso, semaforo en 0
+  shared walls_ready := sempahore(0)
+  shared exterior_plumbing_ready := sempahore(0)
+  shared roof_ready := sempahore(0)
+  shared exterior_painting_ready := sempahore(0)
+  shared interior_plumbing_ready := sempahore(0)
+  shared electrical_installation_ready := sempahore(0)
+  // shared exterior_finishes_ready := sempahore(0)
+  shared interior_painting_ready := sempahore(0)
+  shared floor_ready := sempahore(0)
+  // shared interior_finishes_ready := sempahore(0)
+
+  // reservo la memoria para los hilos
+  // el equipo siempre es constante
+  declare team := reserve_threads(10)
+  // add si crea el hilo, agarrando el campo de memoria
   add_thread(team, walls)
   add_thread(team, exterior_plumbing)
   add_thread(team, roof)
@@ -14,61 +29,88 @@ procedure main(argc, argv[])
   join_threads(team)
 end procedure
 
+// para controlar hilos es 
+// 1. seguridad condicional
+// 2. control de concurrencia
+// a. mutex
+// b. semaforos
+// c. barreras
+// d. variable condicion
+
 procedure walls()
   print "1.2 walls start"
   sleep(random(max_duration))
   print "1.2 walls finish"
+  signal(walls_ready)
+  signal(walls_ready)
 end procedure
 
 procedure exterior_plumbing()
+  wait(walls_ready)
   print "2.1 exterior plumbing start"
   sleep(random(max_duration))
   print "2.1 exterior plumbing finish"
+  signal(exterior_plumbing_ready, 2)
 end procedure
 
 procedure roof()
+  wait(walls_ready)
   print "2.3 roof start"
   sleep(random(max_duration))
   print "2.3 roof finish"
+  signal(roof_ready)
 end procedure
 
 procedure exterior_painting()
+  wait(exterior_plumbing_ready)
   print "3.1 exterior painting start"
   sleep(random(max_duration))
   print "3.1 exterior painting finish"
+  signal(exterior_painting_ready)
 end procedure
 
 procedure interior_plumbing()
+  wait(exterior_plumbing_ready)
   print "3.2 interior plumbing start"
   sleep(random(max_duration))
   print "3.2 interior plumbing finish"
+  signal(interior_plumbing_ready)
 end procedure
 
 procedure electrical_installation()
+  wait(roof_ready)
   print "3.3 electrical installation start"
   sleep(random(max_duration))
   print "3.3 electrical installation finish"
+  signal(electrical_installation_ready)
 end procedure
 
 procedure exterior_finishes()
+  wait(exterior_painting_ready)
   print "4.1 exterior finishes start"
   sleep(random(max_duration))
   print "4.1 exterior finishes finish"
 end procedure
 
 procedure interior_painting()
+  wait(interior_plumbing_ready)
+  wait(electrical_installation_ready)
   print "4.3 interior painting start"
   sleep(random(max_duration))
   print "4.3 interior painting finish"
+  signal(interior_painting_ready)
 end procedure
 
 procedure floor()
+  wait(exterior_painting_ready)
   print "5.3 floor start"
   sleep(random(max_duration))
   print "5.3 floor finish"
+  signal(floor_ready)
 end procedure
 
 procedure interior_finishes()
+  wait(floor_ready)
   print "6.3 interior finishes start"
   sleep(random(max_duration))
   print "6.3 interior finishes finish"

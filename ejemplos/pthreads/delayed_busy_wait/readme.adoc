@@ -51,3 +51,27 @@ Cree una gráfica donde el eje-x son las duraciones dadas por argumento al progr
 Agregue la gráfica al `readme.adoc` del ejercicio y una discusión de a lo sumo dos párrafos. Indique cuál fue el mejor tiempo máximo de espera obtenido y los efectos de disminuir o incrementarlo. Conjeture y trate de explicar por qué ocurre este comportamiento. Finalmente indique si la espera activa con retraso es una solución óptima, y en caso negativo, provea una idea que pueda lograr este ideal.
 
 Si trabajó en equipos, indique además en el `readme.adoc` del ejercicio, los nombres de los miembros que participaron. Todos los miembros tendrán duplicado este documento en sus repositorios privados.
+
+.Gráfica tiempos de ejecución
+image::img/const, random, sem y cond sec.svg[]
+
+.Gráfica tiempos de ejcución logaritmica
+image::img/const, random, sem y cond sec logaritmico.svg[]
+
+== conclusiones
+* El mejor fue de 1.472308175 con un delay de 5µs.
+
+=== Efectos de disminuir o incrementar el tiempo de espera
+
+Al disminuir el tiempo de espera, el tiempo de ejecución del programa disminuye. Esto se debe a que los hilos pasan menos tiempo en espera activa y más tiempo ejecutando su trabajo.
+Al aumentar el tiempo de espera, el tiempo de ejecución del programa aumenta. Esto se debe a que los hilos pasan más tiempo en espera activa y menos tiempo ejecutando su trabajo.
+
+* No hay forma de mejorar la espera activa, ya que el problema de la espera activa es que consume CPU y no permite que otros hilos se ejecuten. La espera activa con retraso simplemente agrega un tiempo de espera, pero no resuelve el problema subyacente de la espera activa.
+* La espera activa con retraso constante puede ser más eficiente que la espera activa sin retraso, pero aún así consume CPU y no permite que otros hilos se ejecuten.
+* La espera activa con retraso pseudoaleatorio puede ser más eficiente que la espera activa con retraso constante, pero aún así consume CPU y no permite que otros hilos se ejecuten.
+* La espera activa sigue siendo nosciva y la unica forma de mejorarla es cambiarla por otra estructura de control de concurrencia.
+* El semaforo y seguridad concicional son de valor constante.
+
+=== Integrantes:
+* Isaías Alfaro Ugalde C20261.
+* Axel Rojas Retana C36944.

@@ -111,11 +111,22 @@ La espera activa ocurre cuando un hilo se mantiene en ejecución sin hacer traba
 
 *10.Condición de carrera.*
 
+Modificacion concurrente de memoria compartida. Cuando se modifica al mismo tiempo una parte de la memoria por dos o mas hilos.
+
+** Ejemplo
+* Un cocinero utiliza una olla para la carne.
+* Otro cocinero echa al mismo tiempo leche en la olla.
+
 *11.Control de concurrencia.*
 
 *12.Seguridad condicional.*
 
 *13.Exclusión mutua.*
+
+Transforma una parte del codigo concurrente en serial. Esto logra elminar las condiciones de carrera. 
+
+** Ejemplo
+* Carril con muchas lineas, llega hasta un puente en el que solo un carro puede cruzar a la vez. 
 
 *14.Semáforo.*
 

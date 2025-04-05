@@ -1,14 +1,23 @@
 procedure main(argc, argv[])
   shared thread_count := integer(argv[1])
+  // arreglo de texto "saludos".
+  // cada hilo va a tener una posicion en especifico para guardar su saludo.
   shared greets := array(thread_count, "")
+  // creacion de hilos para mandarlos a crear el saludo.
   mutable team := create_threads(thread_count, greet)
   print "Hello from main thread"
+  // eliminar los hilos
+  // ademas espera a que todos terminan el trabajo asi no provoca perder saludos.
   join_threads(team)
+  // for para leer el arrya e imprimir los saludos antes generados.
   for thread_number := 0 to thread_count do
     print greets[thread_number]
   end for
 end procedure
 
 procedure greet(thread_number)
+  // condicion de carrera en papel.
+  // en ejecucion los hilos respetan cada memoria de los otros.
+  // no se genera condicion de carrera.
   greets[thread_number] := "Hello from secondary thread {thread_number} of {thread_count}"
 end procedure

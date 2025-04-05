@@ -119,7 +119,16 @@ Modificacion concurrente de memoria compartida. Cuando se modifica al mismo tiem
 
 *11.Control de concurrencia.*
 
+Es cuando en el programa se controla en que orden deben ir ocurriendo las cosas con herramientas como mutexo semaforos.
+
+** Ejemplo
+* Se crea un semaforo para avisar cuando tienen permitido avanzar los autos y cuando detenerse
+
 *12.Seguridad condicional.*
+
+Evitar el control de concurrencia, esto asignando memoria privada a cada hilo, por lo cual no se genera condicion de carrera.
+** Ejemplo
+*  
 
 *13.Exclusión mutua.*
 

@@ -9,10 +9,13 @@
 #include <time.h>
 #include <unistd.h>
 
+// Macro
+// remplaza cada vez que ve el simbolo por lo que se define.
 #define MAX_GREET_LEN 256
 
 // thread_shared_data_t
 typedef struct shared_data {
+  // puntero al array de saludos
   char** greets;
   uint64_t thread_count;
 } shared_data_t;
@@ -24,9 +27,17 @@ typedef struct private_data {
 } private_data_t;
 
 /**
- * @brief ...
+ * @brief Saludo creado por los hilos secundarios y guarda el saludo.
+ * 
+ * @param data puntero con informacion compartida.
  */
 void* greet(void* data);
+/**
+ * @brief Crear los hilos y enviarlos a ejecutar.
+ * 
+ * @param shared_data puntero con informacion compartida.
+ * @return int variable de manejo de errores.
+ */
 int create_threads(shared_data_t* shared_data);
 
 // procedure main(argc, argv[])
@@ -45,6 +56,9 @@ int main(int argc, char* argv[]) {
 
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
+    // inicializar memoria compartida
+    // pedir memoria para el array de saludos.
+    // no crea los saludos solo pide la memoria del array, lo inicializa en 0.
     shared_data->greets = (char**) calloc(thread_count, sizeof(char*));
     shared_data->thread_count = thread_count;
 
@@ -82,8 +96,12 @@ int create_threads(shared_data_t* shared_data) {
   private_data_t* private_data = (private_data_t*)
     calloc(shared_data->thread_count, sizeof(private_data_t));
   if (threads && private_data) {
+    // for para crear todos los hilos que se van a llamar
+    // para ejecutar los saludos.
+    // ademas de incializar la memoria privada de cada hilo.
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
+      // memoria para cada saludo dentro del array
       shared_data->greets[thread_number] = (char*)
         malloc(MAX_GREET_LEN * sizeof(char));
       if (shared_data->greets[thread_number]) {
@@ -110,12 +128,14 @@ int create_threads(shared_data_t* shared_data) {
     // print "Hello from main thread"
     printf("Hello from main thread\n");
 
+    // esperar por los hilos asi no se pierden saludos por indeterminismo.
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
       pthread_join(threads[thread_number], /*value_ptr*/ NULL);
     }
 
     // for thread_number := 0 to thread_count do
+    // imprimir todos los saludos de los hilos en orden
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
       // print greets[thread_number]
@@ -143,8 +163,10 @@ void* greet(void* data) {
   printf("  %" PRIu64 "/%" PRIu64 ": write greeting\n"
     , private_data->thread_number, shared_data->thread_count);
 
-  // greets[thread_number] := format("Hello from secondary thread"
-  // , thread_number, " of ", thread_count)
+  // greets[thread_number] := format("Hello from secondary thread".
+  // , thread_number, " of ", thread_count).
+  // sprintf imprime en un buffer en especifico.
+  // guardar los saludos en el array, solo en su espacio asignado.
   sprintf(shared_data->greets[private_data->thread_number]
     , "Hello from secondary thread %" PRIu64 " of %" PRIu64
     , private_data->thread_number, shared_data->thread_count);

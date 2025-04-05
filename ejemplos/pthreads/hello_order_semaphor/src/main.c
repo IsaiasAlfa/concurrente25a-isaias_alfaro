@@ -23,9 +23,17 @@ typedef struct private_data {
 } private_data_t;
 
 /**
- * @brief ...
+ * @brief Metodo que imprime un saludo en la terminal
+ * 
+ * @param data direccion con los datos compartidos de los hilos.
  */
 void* greet(void* data);
+/**
+ * @brief Metodo para crear los hilos y darles las instrucciones
+ * 
+ * @param shared_data direccion con los datos compartidos de los hilos.
+ * @return int retorno de error para manejar errores
+ */
 int create_threads(shared_data_t* shared_data);
 
 // procedure main(argc, argv[])
@@ -44,9 +52,11 @@ int main(int argc, char* argv[]) {
 
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
+    // memoria para los semaforos que se van a crear para cada hilo
     shared_data->can_greet = (sem_t*) calloc(thread_count, sizeof(sem_t));
     shared_data->thread_count = thread_count;
 
+    // for para crear los semaforos e inicializarlos en 0;
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
       // can_greet[thread_number] := create_semaphore(not thread_number)
@@ -113,6 +123,7 @@ int create_threads(shared_data_t* shared_data) {
     // print "Hello from main thread"
     printf("Hello from main thread\n");
 
+    // destruir nuestro arreglo de semaforos
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
       pthread_join(threads[thread_number], /*value_ptr*/ NULL);
@@ -141,6 +152,7 @@ void* greet(void* data) {
     , private_data->thread_number, shared_data->thread_count);
 
   // wait(can_greet[thread_number])
+  // espera por el semaforo propio para seguir adelante
   int error = sem_wait(&shared_data->can_greet[private_data->thread_number]);
   if (error) {
     fprintf(stderr, "error: could not wait for semaphore\n");
@@ -155,6 +167,7 @@ void* greet(void* data) {
   const uint64_t next_thread = (private_data->thread_number + 1)
     % shared_data->thread_count;
 
+  // incrementa el semaforo del siguiente hilo para que siga la ejecucion
   error = sem_post(&shared_data->can_greet[next_thread]);
   if (error) {
     fprintf(stderr, "error: could not increment semaphore\n");

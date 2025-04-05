@@ -2,6 +2,7 @@ procedure main(argc, argv[])
   shared thread_count := integer(argv[1])
   shared can_greet := array(thread_count, semaphore)
   for thread_number := 0 to thread_count do
+    // arreglo de semaforos
     can_greet[thread_number] := create_semaphore(not thread_number)
     create_thread(greet, thread_number) // thread team
   end for
@@ -9,7 +10,9 @@ procedure main(argc, argv[])
 end procedure
 
 procedure greet(thread_number)
+  // orden de esperar por el semaforo para poder continuar
   wait(can_greet[thread_number])
   print "Hello from secondary thread {thread_number} of {thread_count}"
+  // aumentar el semaforo para el siguiente hilo
   signal(can_greet[mod(thread_number + 1, thread_count)])
 end procedure

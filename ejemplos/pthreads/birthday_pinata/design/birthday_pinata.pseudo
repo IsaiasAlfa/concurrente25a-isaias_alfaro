@@ -1,20 +1,23 @@
 procedure main(argc, argv[])
-  shared position := 0
-  shared can_access_position := create_mutex()
+  // mutex to hit the pinata
+  shared can_hit := create_mutex()
   shared thread_count := integer(argv[1])
+  // vida de la pinata
+  chares healt := integer(argv[2])
   for thread_number := 0 to thread_count do
     create_thread(greet, thread_number) // thread team
   end for
-  print "Hello from main thread"
 end procedure
 
-// metodo para simular la carrera
+// metodo para simular los golpes
 procedure race(thread_number)
-  // entrar a posicion, no generar la condicion de carrera
-  lock(can_access_position)
-  position := position + 1
-  declare my_position := position
-  print "Thread ", thread_number, "/", thread_count ": I arrived at position ",
-    my_position
-  unlock(can_access_position)
+  // entrar a can?hit evita condicion de carrera
+  lock(can_hit)
+  // numero random de 0 a vida de la pinata
+  hit = random {0, healt}
+  // restarle la vida a la pinata
+  healt - hit
+  // imprimir los golpes y si rompio la pinata
+  print "Thread ", thread_number, "/", thread_count ": hits",
+  unlock(can_hit)
 end procedure

@@ -24,6 +24,9 @@
 |9 |link:ejemplos/pthreads/delayed_busy_wait[delayed_busy_wait] |Ejemplo de clase |Programa que imprime un saludo desde un hilo con espera activa elegida por el usuario.
 |10 |link:ejemplos/pthreads/hello_order_semaphor[hello_order_semaphor] |Ejemplo de clase |Programa que imprime un saludo desde un hilo en orden controlado por semaforos.
 |11 |link:ejemplos/pthreads/hello_order_cond_safe[hello_order_cond_safe] |Ejemplo de clase |Programa que imprime un saludo desde un hilo en orden controlado por seguridad condicional.
+|12 |link:ejemplos/pthreads/building_tasks[building_tasks] |Ejemplo de clase |Programa que sigue un orden de tareas mediante semaforos.
+|13 |link:ejemplos/pthreads/position_race[position_race] |Ejemplo comentado| Programa que simula una carrera de hilos con un mutex para la impresion.
+|13 |link:ejemplos/pthreads/birthday_pinata[birthday_pinata] |Extraclase |Programa que simula como unos hilos se turnan con un mutex para romper una piñata.
 |===
 
 == Tareas
@@ -128,7 +131,7 @@ Es cuando en el programa se controla en que orden deben ir ocurriendo las cosas 
 
 Evitar el control de concurrencia, esto asignando memoria privada a cada hilo, por lo cual no se genera condicion de carrera.
 ** Ejemplo
-*  
+* Una persona entrega los pedidos en lugar de que todos traten al mismo tiempo de tomar su pedido. 
 
 *13.Exclusión mutua.*
 

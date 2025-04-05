@@ -8,7 +8,9 @@ procedure main(argc, argv[])
   print "Hello from main thread"
 end procedure
 
+// metodo para simular la carrera
 procedure race(thread_number)
+  // entrar a posicion, no generar la condicion de carrera
   lock(can_access_position)
   position := position + 1
   declare my_position := position

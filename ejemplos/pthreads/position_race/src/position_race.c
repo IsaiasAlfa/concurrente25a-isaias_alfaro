@@ -23,17 +23,16 @@ typedef struct private_data {
 } private_data_t;
 
 /**
- * @brief ...
+ * @brief Metodo que imprime en terminal la posicion de llegada del hilo a la "meta"
  * 
- * @param
- * @return
+ * @param data Puntero con la informacion compartida de los datos.
  */
 void* race(void* data);
 /**
- * @brief Create a threads object
+ * @brief Metodo para crear los hilos y enviarlos a competir.
  * 
- * @param shared_data 
- * @return int 
+ * @param shared_data Puntero con la informacion compartida de cada hilo.
+ * @return int retorno para ver si fallo el proceso.
  */
 int create_threads(shared_data_t* shared_data);
 
@@ -54,6 +53,8 @@ int main(int argc, char* argv[]) {
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
     shared_data->position = 0;
+    // creacion del mutex
+    // antes de todo para que este disponible
     error = pthread_mutex_init(&shared_data->can_access_position, /*attr*/NULL);
     if (error == EXIT_SUCCESS) {
       shared_data->thread_count = thread_count;
@@ -69,6 +70,7 @@ int main(int argc, char* argv[]) {
 
       printf("Execution time: %.9lfs\n", elapsed_time);
 
+      // free de mutex from memory
       pthread_mutex_destroy(&shared_data->can_access_position);
       free(shared_data);
     } else {
@@ -138,6 +140,7 @@ void* race(void* data) {
   // position := position + 1
   ++shared_data->position;
   // my_position := position
+  // my is private
   uint64_t my_position = shared_data->position;
   // print "Hello from secondary thread"
   printf("Thread %" PRIu64 "/%" PRIu64 ": I arrived at position %" PRIu64 "\n"

@@ -130,6 +130,11 @@ Transforma una parte del codigo concurrente en serial. Esto logra elminar las co
 
 *14.Semáforo.*
 
+Es un entero que permite controlar a los hilos, genera wait hasta que el semaforo permita pasar al hilo.
+
+** Ejemplo
+* Un semaforo esta en 2 pasa un hilo y lo decrementa, luego pasa otro y lo baja. Esta en 0 el proximo hilo llega y al estar en 0 no lo deja pasar, ya que lo baja y pasa a -1.
+
 *15.Barrera.*
 
 *16.Variable de condición.*

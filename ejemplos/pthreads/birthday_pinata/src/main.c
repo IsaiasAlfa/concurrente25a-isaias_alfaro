@@ -11,14 +11,14 @@
 
 // thread_shared_data_t
 typedef struct shared_data {
-  uint64_t position;
-  pthread_mutex_t can_access_position;
+  pthread_mutex_t can_hit;
   uint64_t thread_count;
   uint64_t healt;
 } shared_data_t;
 
 // thread_private_data_t
 typedef struct private_data {
+  uint64_t hits;
   uint64_t thread_number;  // rank
   shared_data_t* shared_data;
 } private_data_t;
@@ -28,7 +28,7 @@ typedef struct private_data {
  * 
  * @param data Puntero con la informacion compartida de los datos.
  */
-void* hit(void* data);
+void* hit_pinata(void* data);
 /**
  * @brief Metodo para crear los hilos y enviarlos a competir.
  * 
@@ -40,11 +40,20 @@ int create_threads(shared_data_t* shared_data);
 // procedure main(argc, argv[])
 int main(int argc, char* argv[]) {
   int error = EXIT_SUCCESS;
+  // semilla para aleatorios
+  srand(time(0));
+  // vida de la pinata
+  uint64_t healty = 10;
   // create thread_count as result of converting argv[1] to integer
   // thread_count := integer(argv[1])
   uint64_t thread_count = sysconf(_SC_NPROCESSORS_ONLN);
-  if (argc == 2) {
+  if (argc == 3) {
     if (sscanf(argv[1], "%" SCNu64, &thread_count) == 1) {
+      if (sscanf(argv[2], "%" SCNu64, &healty) == 1) {
+      } else {
+        fprintf(stderr, "Error: invalid healt count\n");
+        return 14;
+      }
     } else {
       fprintf(stderr, "Error: invalid thread count\n");
       return 11;
@@ -53,10 +62,11 @@ int main(int argc, char* argv[]) {
 
   shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
   if (shared_data) {
-    shared_data->position = 0;
+    // vida de la piñata
+    shared_data->healt = healty;
     // creacion del mutex
     // antes de todo para que este disponible
-    error = pthread_mutex_init(&shared_data->can_access_position, /*attr*/NULL);
+    error = pthread_mutex_init(&shared_data->can_hit, /*attr*/NULL);
     if (error == EXIT_SUCCESS) {
       shared_data->thread_count = thread_count;
 
@@ -72,7 +82,7 @@ int main(int argc, char* argv[]) {
       printf("Execution time: %.9lfs\n", elapsed_time);
 
       // free de mutex from memory
-      pthread_mutex_destroy(&shared_data->can_access_position);
+      pthread_mutex_destroy(&shared_data->can_hit);
       free(shared_data);
     } else {
       fprintf(stderr, "Error: could not init mutex\n");
@@ -99,7 +109,7 @@ int create_threads(shared_data_t* shared_data) {
       private_data[thread_number].thread_number = thread_number;
       private_data[thread_number].shared_data = shared_data;
       // create_thread(greet, thread_number)
-      error = pthread_create(&threads[thread_number], /*attr*/ NULL, race
+      error = pthread_create(&threads[thread_number], /*attr*/ NULL, hit_pinata
         , /*arg*/ &private_data[thread_number]);
       if (error == EXIT_SUCCESS) {
       } else {
@@ -108,9 +118,6 @@ int create_threads(shared_data_t* shared_data) {
         break;
       }
     }
-
-    // print "Hello from main thread"
-    printf("Hello from main thread\n");
 
     for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
         ; ++thread_number) {
@@ -128,26 +135,31 @@ int create_threads(shared_data_t* shared_data) {
   return error;
 }
 
-// procedure greet:
-void* race(void* data) {
+// procedure hit_pinata:
+void* hit_pinata(void* data) {
   assert(data);
   private_data_t* private_data = (private_data_t*) data;
   shared_data_t* shared_data = private_data->shared_data;
 
-  // lock(can_access_position)
-  pthread_mutex_lock(&shared_data->can_access_position);
-  // race condition/data race/condición de carrera:
-  // modificación concurrente de memoria compartida
-  // position := position + 1
-  ++shared_data->position;
-  // my_position := position
-  // my is private
-  uint64_t my_position = shared_data->position;
-  // print "Hello from secondary thread"
-  printf("Thread %" PRIu64 "/%" PRIu64 ": I arrived at position %" PRIu64 "\n"
-    , private_data->thread_number, shared_data->thread_count, my_position);
-
+  pthread_mutex_lock(&shared_data->can_hit);
+  // hit piñata
+  if (shared_data->healt > 0) {
+    int64_t hit = (rand() % (shared_data->healt) + 1);
+    shared_data->healt = shared_data->healt - hit;
+    private_data->hits = hit;
+    if (shared_data->healt == 0) {
+      printf("Thread %" PRIu64 "/%" PRIu64 ": hits %" PRIu64
+          " I broke the pinata" "\n", private_data->thread_number
+          , shared_data->thread_count, hit);
+    } else {
+      printf("Thread %" PRIu64 "/%" PRIu64 ": hits %" PRIo64 "\n"
+          , private_data->thread_number, shared_data->thread_count, hit);
+    }
+  } else {
+    printf("Thread %" PRIu64 "/%" PRIu64 ":hits %d\n"
+      , private_data->thread_number, shared_data->thread_count, 0);
+  }
   // unlock(can_access_position)
-  pthread_mutex_unlock(&shared_data->can_access_position);
+  pthread_mutex_unlock(&shared_data->can_hit);
   return NULL;
 }  // end procedure

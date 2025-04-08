@@ -27,6 +27,7 @@
 |12 |link:ejemplos/pthreads/building_tasks[building_tasks] |Ejemplo de clase |Programa que sigue un orden de tareas mediante semaforos.
 |13 |link:ejemplos/pthreads/position_race[position_race] |Ejemplo comentado| Programa que simula una carrera de hilos con un mutex para la impresion.
 |13 |link:ejemplos/pthreads/birthday_pinata[birthday_pinata] |Extraclase |Programa que simula como unos hilos se turnan con un mutex para romper una piñata.
+|13 |link:ejemplos/pthreads/prod_cons_bound[prod_cons_bound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con dos hilos y controlados con semaforos.
 |===
 
 == Tareas

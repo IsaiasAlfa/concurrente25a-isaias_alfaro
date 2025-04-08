@@ -9,9 +9,11 @@
 #include "common.hpp"
 
 // Forward declarations
+// declaraciones para que entiedna que en un futuro van a existir
 class ConsumerTest;
 class DispatcherTest;
 class ProducerTest;
+class AssemblerTest;
 
 /**
  * @brief Controller class that simulates the message passing between
@@ -31,6 +33,8 @@ class ProducerConsumerTest {
   int dispatcherDelay = 0;
   /// Delay of consumer to consume a package, negative for max random
   int consumerDelay = 0;
+  /// Probability of package lost
+  double packageLostProbability = 0.0;
 
  private:
   /// Producer of the simulated network messages
@@ -39,6 +43,8 @@ class ProducerConsumerTest {
   DispatcherTest* dispatcher = nullptr;
   /// Consumers of the simulated network messages
   std::vector<ConsumerTest*> consumers;
+  /// Consume and may lost simulatd network messages
+  AssemblerTest* assembler = nullptr;
 
  public:
   /// Constructor
@@ -52,7 +58,7 @@ class ProducerConsumerTest {
   /// Analyze the command line arguments
   int analyzeArguments(int argc, char* argv[]);
   /// Create network threads: producers, consumers, assemblers and dispatchers
-  void createThreads();
+  void createThreadObjects();
   /// Intercommunicate threads using queues
   void connectQueues();
   /// Start the execution of threads

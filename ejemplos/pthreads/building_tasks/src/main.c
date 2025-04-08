@@ -8,8 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
-// no logre hacer el include con el archivo
-// #include "ethread.h"
+#include "ethread.h"
 
 struct shared_data {
   useconds_t max_duration;  // microseconds

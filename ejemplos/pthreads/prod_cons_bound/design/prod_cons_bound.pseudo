@@ -1,6 +1,10 @@
 procedure main(argc, argv[]):
+  // ver si se dieron los parametros en linea de comandos
   if argc = 7 then
+    // parametros de la ejecucion
+    // shared para que todos los hilos tengan accseso a estos
     shared buffer_capacity := integer(argv[1])
+    // array que cumple como buffer 
     shared buffer as array of buffer_capacity of float
     shared rounds := integer(argv[2])
     shared producer_min_delay := integer(argv[3])
@@ -11,7 +15,9 @@ procedure main(argc, argv[]):
     shared can_produce := create_semaphore(buffer_capacity)
     shared can_consume := create_semaphore(0)
 
+    // hilos para producir, solo se crea uno
     create_threads(1, produce)
+    // hilos para consumir, solo se crea uno
     create_threads(1, consume)
   end if
 end procedure
@@ -20,10 +26,16 @@ procedure produce:
   declare count := 0
   for round := 1 to rounds do
     for index := 0 to buffer_capacity do
+      // semaforo que le permite producir 
       wait(can_produce)
+      // simulacion de lo que se dura produciendo
+      // como en la vida real que se dura creando el producto
       delay(random_between(producer_min_delay, producer_max_delay))
+      // se aumenta el buffer para decir que haya un producto para consumir
       buffer[index] := ++count
+      // aviso de que se produjo y la posicion de la produccion
       print("Produced ", buffer[index])
+      // permite al semaforo de consumir para dejarlo avanzar
       signal(can_consume)
     end for
   end for
@@ -32,15 +44,21 @@ end procedure
 procedure consume:
   for round := 1 to rounds do
     for index := 0 to buffer_capacity do
+      // semaforo que le permite consumir 
       wait(can_consume)
+      // se accede al buffer donde se consume
       value := buffer[index]
+      // simulacion de lo que se dura en lo que se consume
       delay(random_between(consumer_min_delay, consumer_max_delay))
+      // aviso que consumio un producto
       print("Consumed ", value)
+      // permite al semaforo de produccion para dejarlo avanzar
       signal(can_produce)
     end for
   end for
 end procedure
 
+// numero random para crear el delay de la produccion
 function random_between(min, max):
   return min + rand() % (max - min)
 end function

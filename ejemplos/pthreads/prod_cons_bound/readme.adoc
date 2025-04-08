@@ -1,3 +1,11 @@
+= prod_cons_bound
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
 Cree una simulación del productor-consumidor. Su programa recibirá seis argumentos en la línea de comandos:
 
 1. El tamaño del buffer.

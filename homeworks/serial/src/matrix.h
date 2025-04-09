@@ -1,4 +1,4 @@
-// Copyright 2024 Isaias Alfaro Ugalde
+// Copyright 2025 Isaias Alfaro Ugalde
 #ifndef SRC_MATRIX_H_
 #define SRC_MATRIX_H_
 
@@ -65,7 +65,7 @@ void make_free(struct data_job *plate_data, struct data_array *dat);
  * @param filas Int que me dice las filas de la matriz
  * @param columnas Int que me cuenta las columnas de la matriz.
  */
-struct heat **crear_matriz(int filas, int columnas);
+struct heat **matrix(int filas, int columnas);
 
 /**
  * @brief Liberar la memoria de la matriz
@@ -76,6 +76,6 @@ struct heat **crear_matriz(int filas, int columnas);
  * @param filas Int que me dice las filas de la matriz
  * @param matrix Puntero que me da donde inicia la matriz.
  */
-void liberar_matrix(struct heat **matrix, int filas);
+void free_matrix(struct heat **matrix, int filas);
 
 #endif  // SRC_MATRIX_H_ // Fin del guardia de inclusión

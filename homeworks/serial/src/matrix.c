@@ -1,11 +1,12 @@
-// Copyright 2024 Isaias Alfaro Ugalde
+// Copyright 2025 Isaias Alfaro Ugalde
 
 #include <matrix.h>
 
 
 void make_data(const char *filename, char job[]) {
-  struct data_job *plate_data = malloc(sizeof(struct data_job));
-  struct data_array *dat = malloc(sizeof(struct data_array) * 40);
+  struct data_job *plate_data = calloc(sizeof(struct data_job), sizeof(double));
+  struct data_array *dat = calloc(sizeof(struct data_array) * 40,
+    sizeof(double));
 
   int cont_array = 0;
   if (plate_data == NULL || dat == NULL) {
@@ -30,7 +31,7 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
     plate_charge_RC(plate_data, i, dat);
     int rows = plate_data->R;
     int cols = plate_data->C;
-    struct heat **heat_data = crear_matriz(rows, cols);
+    struct heat **heat_data = matrix(rows, cols);
     if (heat_data == NULL) {
       printf("Error al asignar memoria");
       return;
@@ -38,7 +39,7 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
     plate_charge_heat(i, dat, heat_data);
     make_heat(plate_data, heat_data);
     jobs_out_file(dat, heat_data, plate_data, job_file, i);
-    liberar_matrix(heat_data, rows);
+    free_matrix(heat_data, rows);
   }
   jobs_close_file(job_file);
   make_free(plate_data, dat);
@@ -101,8 +102,8 @@ void make_free(struct data_job *plate_data, struct data_array *dat) {
   free(dat);
 }
 
-struct heat **crear_matriz(int filas, int columnas) {
-  struct heat **matriz = malloc(filas * sizeof(struct heat *));
+struct heat **matrix(int filas, int columnas) {
+  struct heat **matriz = calloc(filas * sizeof(struct heat *), sizeof(double));
   if (matriz == NULL) {
       perror("No se pudo asignar memoria para los punteros a las filas");
       exit(EXIT_FAILURE);
@@ -112,14 +113,14 @@ struct heat **crear_matriz(int filas, int columnas) {
     if (matriz[i] == NULL) {
         perror("No se pudo asignar memoria para una fila");
         // Liberar memoria ya asignada
-        liberar_matrix(matriz, i);
+        free_matrix(matriz, i);
         exit(EXIT_FAILURE);
       }
   }
   return matriz;
 }
 
-void liberar_matrix(struct heat **matrix, int filas) {
+void free_matrix(struct heat **matrix, int filas) {
   for (int i = 0; i < filas; i++) {
     free(matrix[i]);
 }

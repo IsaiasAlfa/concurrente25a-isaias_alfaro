@@ -1,4 +1,4 @@
-// Copyright 2024 Isaias Alfaro Ugalde
+// Copyright 2025 Isaias Alfaro Ugalde
 
 #include <inter.h>
 

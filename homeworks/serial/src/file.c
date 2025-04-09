@@ -1,6 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
-#include <inter.h>
+#include <file.h>
 
 void jobs_find_file(const char *filename, struct data_array *dat,
     int *cont_array) {
@@ -129,7 +129,7 @@ void jobs_out_file(struct data_array *dat, struct heat **heat_data,
   char state_plate[100];
   char *dot_position = strchr(dat[position].plate, '.');
   size_t base_length = dot_position - dat[position].plate;
-  snprintf(state_plate, sizeof(state_plate), "%.*s-%d%s",
+  snprintf(state_plate, sizeof(state_plate), "out/%.*s-%d%s",
       (int)base_length, dat[position].plate, plate_data->report, dot_position);
   FILE *file_plate = fopen(state_plate, "wb");
   fwrite(&plate_data->R, sizeof(uint64_t), 1, file_plate);

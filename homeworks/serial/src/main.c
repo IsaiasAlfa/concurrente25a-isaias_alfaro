@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <matrix.h>
+#include <plate.h>
 
 int main() {
   char filename[100];

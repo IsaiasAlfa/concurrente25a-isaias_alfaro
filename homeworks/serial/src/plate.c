@@ -1,7 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
-#include <matrix.h>
-
+#include <plate.h>
 
 void make_data(const char *filename, char job[]) {
   struct data_job *plate_data = calloc(sizeof(struct data_job), sizeof(double));
@@ -25,7 +24,8 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
     int * cont_array, char job[]) {
   int position = *cont_array;
   char job_filename[104];
-  snprintf(job_filename, sizeof(job_filename), "%s.tsv", job);
+  mkdir("out", 0777);
+  snprintf(job_filename, sizeof(job_filename), "out/%s.tsv", job);
   FILE *job_file = fopen(job_filename, "w");
   for (int i = 0; i < position; i++) {
     plate_charge_RC(plate_data, i, dat);

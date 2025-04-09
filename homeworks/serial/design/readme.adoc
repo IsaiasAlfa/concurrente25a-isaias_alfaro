@@ -18,6 +18,10 @@ image::./images/Serial_heat.svg[UML]
 
 ---
 
+== Estructura de datos
+
+* *Matriz*: Al simular una lámina, buscamos recrearla en un programa con cierta exactitud respecto a una lámina en la vida real. Para ello, se optó por una matriz en la que inyectamos calor en los bordes durante la simulación, mientras que en las celdas interiores calculamos progresivamente la distribución del calor mediante una fórmula específica. 
+
 === Structs
 
 En el programa existen tres structs.

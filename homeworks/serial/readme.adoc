@@ -78,6 +78,18 @@ platexxx-x.bin :: Este archivo corresponde a la lámina final luego de la simula
 
 image::design/images/SalidaPrograma.png[]
 
+=== Errores
+
+El programa cuenta con un sistema de manejo de errores, cuyo propósito es proporcionar explicaciones sobre por qué se produjo una falla durante la ejecución. Esto permite al usuario comprender mejor lo ocurrido y facilita el proceso de corrección. A continuación, se presentan algunos ejemplos de errores gestionados por el programa:
+
+image::design/images/Error1.png[]
+
+En este error no pudo encontrar el archivo job que el usuario le brindo al principio.
+
+image::design/images/Error2.png[]
+
+En este vemos que no encontro los archivos plate, por lo cual no puede crear las placas a usar en la ejecucion.
+
 == Créditos
 
 Isaías Alberto Alfaro Ugalde <isaias.alfaro@ucr.ac.cr>.

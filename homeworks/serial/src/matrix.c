@@ -95,8 +95,6 @@ void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
   plate_data->report = cycles;
 }
 
-
-
 void make_free(struct data_job *plate_data, struct data_array *dat) {
   free(plate_data);
   free(dat);

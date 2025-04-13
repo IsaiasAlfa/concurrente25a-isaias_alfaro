@@ -10,13 +10,20 @@
 #include "file.h"
 #include "ethread.h"
 
-
+/**
+ * @brief Estructura que almacena los datos compartidos de los hilos.
+ * 
+ */
 typedef struct shared_data {
     heat_t** heat;
     data_job_t* data_job;
     uint64_t thread_count;
 }shared_data_t;
 
+/**
+ * @brief Estructura que almacena los datos privados de cada hilo.
+ * 
+ */
 typedef struct private_data {
     uint64_t thread_number;
     shared_data_t* shared_data;
@@ -32,6 +39,7 @@ typedef struct private_data {
  *
  * @param filename Nombre del archivo que contiene los datos para la simulación.
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
+ * @param thread_count Cantidad de hilos a usar en la ejecución. 
  */
 void make_data(const char *filename, char job[], uint64_t thread_count);
 
@@ -41,7 +49,7 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
  * Llama a las funciones para cargar datos y crear matrices de calor. Asigna y
  * libera memoria para la matriz de calor durante el proceso.
  *
- * @param plate_data Estructura que contiene la información de la placa.
+ * @param shared_data Estructura que contiene la información de la placa.
  * @param dat Array de datos que se utilizarán en la simulación.
  * @param cont_array Puntero a un entero que cuenta el número de datos procesados.
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
@@ -49,15 +57,23 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
 void make_matrix(shared_data_t* shared_data, data_array_t *dat,
     int *cont_array, char job[]);
 
+/**
+ * @brief Metodo de creacion de equipos para la simulacion.
+ * 
+ * Crea los equipos de hilos que van a simular la tranferencia de calor en la placa
+ * tambien los elimina y vuelve a crear para otra iteracion.
+ * 
+ * @param shared_data Puntero a la estructura que contiene los datos compartidos de los hilos.
+ */
 void heat_team(shared_data_t* shared_data);
+
 /**
  * @brief Calcula y actualiza la distribución de calor en la placa.
  *
  * Utiliza el método de difusión para calcular la distribución del calor en la
- * placa hasta que se alcanza el equilibrio.
+ * placa.
  *
- * @param plate_data Estructura que contiene la información de la placa.
- * @param heat_data Matriz que contiene los datos de calor actuales y pasados.
+ * @param data Puntero con la información privada de cada hilo para su correcta ejecución.
  */
 void* make_heat(void* data);
 
@@ -69,6 +85,7 @@ void* make_heat(void* data);
  *
  * @param plate_data Estructura que contiene la información de la placa.
  * @param dat Array de datos que se utilizarán en la simulación.
+ * @param shared_data Estructura de datos compartidos.
  */
 void make_free(data_job_t* data_job, data_array_t* data_array,
     shared_data_t* shared_data);
@@ -95,6 +112,19 @@ heat_t** matrix(int filas, int columnas);
  */
 void free_matrix(heat_t** heat, int filas);
 
+/**
+ * @brief Metodo de analisis de argumentos.
+ * 
+ * Pide los argumentos al usuario, analiza en caso de errores y los guarda
+ * en sus variables respectivas para la ejecucion del programa.
+ * 
+ * @param filename Puntero donde se guarda el nombre del archivo de trabajo
+ * @param filename_size Tamano del archvio de trabajo
+ * @param job Nombre base del archivo de trabajo
+ * @param job_size Tamano del nombre base
+ * @param thread_count Cantidad de hilos para la ejecucion
+ * @return int Retorno para ver si hay algun error de entrada
+ */
 int analyze_arguments(char* filename, size_t filename_size, char* job,
     size_t job_size, uint64_t* thread_count);
 

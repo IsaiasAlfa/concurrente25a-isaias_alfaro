@@ -149,14 +149,3 @@ char* format_time(const time_t seconds, char* text, const size_t capacity) {
     gmt->tm_mon, gmt->tm_mday - 1, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
   return text;
 }
-
-int analyze_arguments(int arg, char* argv[]) {
-  if (arg == 2) {
-    
-  } else if(arg == 3 ) {
-
-  } else {
-    return 1;
-  }
-  return 2;
-}

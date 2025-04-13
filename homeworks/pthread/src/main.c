@@ -1,45 +1,26 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 
-#include <plate.h>
+#include "plate.h"
+
 
 int main() {
+  int error = EXIT_SUCCESS;
+  // nombre completo del archivo
   char filename[100];
+  // nombre para archvio de trabajo
   char job[7] = {0};
-  char *start, *end;
-
-  printf("Ingresa el nombre del archivo: ");
-  fgets(filename, sizeof(filename), stdin);
-  filename[strcspn(filename, "\n")] = '\0';
-
-
-  start = strrchr(filename, '/');
-  if (start != NULL) {
-      start++;
-  } else {
-      start = filename;
+  // cantidad de hilos
+  uint64_t thread_count = sysconf(_SC_NPROCESSORS_ONLN);
+  // analisis de argumentos
+  error = analyze_arguments(filename, sizeof(filename), job,
+    sizeof(job), &thread_count);
+  // llamado a funcion principal
+  if (error == EXIT_SUCCESS) {
+    make_data(filename, job, thread_count);
   }
-  end = strchr(start, '.');
-  size_t length = end - start;
-  if (end != NULL) {
-    if (length >= sizeof(job)) {
-      length = sizeof(job) - 1;
-    }
-    snprintf(job, sizeof(job), "%.*s", (int)length, start);
-    } else {
-      if (strlen(start) >= sizeof(job)) {
-        printf("Error: el nombre del archivo es demasiado largo .\n");
-        return 1;
-      }
-    snprintf(job, sizeof(job), "%.*s", (int)length, start);
-    }
-    if (strstr(job, "job") != NULL) {
-      printf("Nombre del archivo ingresado: %s\n", job);
-      make_data(filename, job);
-    } else {
-      printf("Nombre del archivo no encontrado o incorrecto\n");
-    }
   return 0;
 }

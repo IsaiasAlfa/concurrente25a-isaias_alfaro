@@ -2,7 +2,7 @@
 
 #include <plate.h>
 
-void make_data(const char *filename, char job[]) {
+void make_data(const char *filename, char job[], uint64_t thread_count) {
   struct data_job *plate_data = calloc(sizeof(struct data_job), sizeof(double));
   struct data_array *dat = calloc(sizeof(struct data_array) * 40,
     sizeof(double));
@@ -123,4 +123,52 @@ void free_matrix(struct heat **matrix, int filas) {
     free(matrix[i]);
 }
 free(matrix);
+}
+
+int analyze_arguments(char* filename, size_t filename_size, char* job,
+    size_t job_size, uint64_t* thread_count) {
+  char *start, *end;
+  char buffer[100];
+
+  // Leer nombre del archivo
+  printf("Ingresa el nombre del archivo: ");
+  if (fgets(filename, filename_size, stdin) == NULL) {
+      printf("Error al leer el nombre del archivo.\n");
+      return 1;
+  }
+  filename[strcspn(filename, "\n")] = '\0';
+
+  // Extraer nombre base sin extensión
+  start = strrchr(filename, '/');
+  start = (start != NULL) ? start + 1 : filename;
+  end = strchr(start, '.');
+
+  size_t length = (end != NULL) ? (size_t)(end - start) : strlen(start);
+  if (length >= job_size) {
+      printf("Error: el nombre del archivo es demasiado largo.\n");
+      return 1;
+  }
+  snprintf(job, job_size, "%.*s", (int)length, start);
+
+  // Validar que contiene "job"
+  if (strstr(job, "job") != NULL) {
+      printf("Nombre del archivo ingresado: %s\n", job);
+  } else {
+      printf("Nombre del archivo no encontrado o incorrecto.\n");
+      return 1;
+  }
+
+  // Leer cantidad de hilos
+  printf("Ingrese la cantidad de hilos: ");
+  if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+      printf("Error al leer la cantidad de hilos.\n");
+      return 1;
+  }
+  *thread_count = strtoull(buffer, NULL, 10);
+  if (*thread_count == 0) {
+      printf("Cantidad de hilos inválida.\n");
+      return 1;
+  }
+
+  return 0;
 }

@@ -1,6 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
-#ifndef SRC_INTER_H_
-#define SRC_INTER_H_
+#ifndef SRC_FILE_H_
+#define SRC_FILE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,13 +116,4 @@ void jobs_out_file(struct data_array *dat, struct heat **heat_data,
  */
 char* format_time(const time_t seconds, char* text, const size_t capacity);
 
-/**
- * @brief Analiza la entrada de argumentos y extra la informacion de la terminal
- * 
- * @param argv puntero a la entrada en terminal del usuario
- * 
- * @return void, ya que carga la info en un struct
- */
-int analyze_arguments(int arg, char* argv[]);
-
-#endif  // SRC_INTER_H_ // Fin del guardia de inclusión
+#endif  // SRC_FILE_H_ // Fin del guardia de inclusión

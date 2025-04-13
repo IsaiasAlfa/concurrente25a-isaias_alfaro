@@ -1,12 +1,14 @@
 // Copyright 2025 Isaias Alfaro Ugalde
-#ifndef SRC_MATRIX_H_
-#define SRC_MATRIX_H_
+#ifndef SRC_PLATE_H_
+#define SRC_PLATE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <sys/stat.h>
-#include <file.h>
+
+#include "file.h"
+#include "ethread.h"
 
 
 /**
@@ -19,7 +21,7 @@
  * @param filename Nombre del archivo que contiene los datos para la simulación.
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
  */
-void make_data(const char *filename, char job[]);
+void make_data(const char *filename, char job[], uint64_t thread_count);
 
 /**
  * @brief Crea la matriz de datos de calor y gestiona el proceso de simulación.
@@ -79,4 +81,7 @@ struct heat **matrix(int filas, int columnas);
  */
 void free_matrix(struct heat **matrix, int filas);
 
-#endif  // SRC_MATRIX_H_ // Fin del guardia de inclusión
+int analyze_arguments(char* filename, size_t filename_size, char* job,
+    size_t job_size, uint64_t* thread_count);
+
+#endif  // SRC_PLATE_H_ // Fin del guardia de inclusión

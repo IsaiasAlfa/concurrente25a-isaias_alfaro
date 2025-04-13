@@ -29,6 +29,7 @@ typedef struct data_job {
   uint64_t C;         // < Número de columnas de la matriz de la placa.
   int balance;        // < Bool Indicador de equilibrio térmico.
   int report;         // < Contador de iteraciones o reportes en la simulación.
+  double burn;
 } data_job_t;
 
 /**

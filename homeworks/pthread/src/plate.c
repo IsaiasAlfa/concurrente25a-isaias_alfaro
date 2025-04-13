@@ -3,125 +3,187 @@
 #include <plate.h>
 
 void make_data(const char *filename, char job[], uint64_t thread_count) {
-  data_job_t* plate_data = (data_job_t*) calloc(1, sizeof(data_job_t));
-  data_array_t* dat = calloc(sizeof(struct data_array) * 40, sizeof(double));
+  data_job_t* data_job = (data_job_t*) calloc(1, sizeof(data_job_t));
+  data_array_t* data_array = calloc(40, sizeof(struct data_array));
+  shared_data_t* shared_data =
+    (shared_data_t*) calloc(1, sizeof(shared_data_t));
 
   int cont_array = 0;
-  if (plate_data == NULL || dat == NULL) {
+  if (data_job == NULL || data_array == NULL || shared_data == NULL) {
     // Manejar errores de asignación de memoria
     fprintf(stderr, "Error al asignar memoria\n");
-    free(plate_data);
-    free(dat);
+    free(data_job);
+    free(data_array);
+    free(shared_data);
     return;
   }
 
-  jobs_find_file(filename, dat, &cont_array);
-  make_matrix(plate_data, dat, &cont_array, job);
+  shared_data->data_job = data_job;
+  shared_data->thread_count = thread_count;
+
+  jobs_find_file(filename, data_array, &cont_array);
+  make_matrix(shared_data, data_array, &cont_array, job);
 }
 
-void make_matrix(data_job_t* plate_data, data_array_t* dat,
+void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     int* cont_array, char job[]) {
+  data_job_t* data_job = shared_data->data_job;
   int position = *cont_array;
   char job_filename[104];
   mkdir("out", 0777);
   snprintf(job_filename, sizeof(job_filename), "out/%s.tsv", job);
   FILE *job_file = fopen(job_filename, "w");
+  uint64_t threads_max = shared_data->thread_count;
   for (int i = 0; i < position; i++) {
-    plate_charge_RC(plate_data, i, dat);
-    int rows = plate_data->R;
-    int cols = plate_data->C;
-    struct heat **heat_data = matrix(rows, cols);
-    if (heat_data == NULL) {
+    plate_charge_RC(data_job, i, data_array);
+    int rows = data_job->R;
+    int cols = data_job->C;
+    heat_t** heat = matrix(rows, cols);
+
+    if (heat == NULL) {
       printf("Error al asignar memoria");
       return;
     }
-    plate_charge_heat(i, dat, heat_data);
-    make_heat(plate_data, heat_data);
-    jobs_out_file(dat, heat_data, plate_data, job_file, i);
-    free_matrix(heat_data, rows);
+    shared_data->heat = heat;
+    plate_charge_heat(i, data_array, heat);
+    shared_data->thread_count = threads_max;
+
+    if (shared_data->thread_count > data_job->R) {
+      shared_data->thread_count = data_job->R;
+    }
+
+    heat_team(shared_data);
+    jobs_out_file(data_array, heat, data_job, job_file, i);
+    free_matrix(heat, rows);
   }
   jobs_close_file(job_file);
-  make_free(plate_data, dat);
+  make_free(data_job, data_array, shared_data);
 }
 
-void make_heat(data_job_t* plate_data, heat_t** heat_dat) {
+void heat_team(shared_data_t* shared_data) {
+  data_job_t* data_job = shared_data->data_job;
+  heat_t** heat = shared_data->heat;
+
+  pthread_t* threads = (pthread_t*)
+    malloc(shared_data->thread_count * sizeof(pthread_t));
+
+  private_data_t* private_data = (private_data_t*)
+    calloc(shared_data->thread_count, sizeof(private_data_t));
+
   double cycles = 0;
-  double auxiliar = 0;
   double rest_heat = 0;
-  plate_data->balance = 0;  // Inicializamos balance a 0 (no equilibrado)
+  data_job->balance = 0;  // Inicializamos balance a 0 (no equilibrado)
 
-  double burn = (plate_data->time * plate_data->material) /
-      (plate_data->area * plate_data->area);
+  double burn = (data_job->time * data_job->material) /
+  (data_job->area * data_job->area);
+  data_job->burn = burn;
 
-  if (plate_data->R <= 1 || plate_data->C <= 1) {
+  if (data_job->R <= 1 || data_job->C <= 1) {
     printf("Error: dimensiones de la matriz no válidas.\n");
     return;
   }
 
-  while (plate_data->balance != 1) {
-    plate_data->balance = 1;
+  while (data_job->balance != 1) {
+    data_job->balance = 1;
 
-    // Iterar sobre las celdas de la matriz, excepto las fronteras
-    for (uint64_t i = 1; i < plate_data->R - 1; i++) {
-      for (uint64_t j = 1; j < plate_data->C - 1; j++) {
-        // Calcular el cambio en el calor
-        auxiliar = burn * (heat_dat[i-1][j].past_warm +
-            heat_dat[i][j-1].past_warm +
-            heat_dat[i][j+1].past_warm +
-            heat_dat[i+1][j].past_warm - (4 * heat_dat[i][j].past_warm));
-        heat_dat[i][j].current_warm = heat_dat[i][j].current_warm + auxiliar;
+    for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
+      ; ++thread_number) {
+      private_data[thread_number].thread_number = thread_number;
+      private_data[thread_number].shared_data = shared_data;
 
+      pthread_create(&threads[thread_number], /*attr*/ NULL, make_heat
+        , /*arg*/ &private_data[thread_number]);
+    }
+
+    for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
+      ; ++thread_number) {
+    pthread_join(threads[thread_number], /*value_ptr*/ NULL);
+    }
+
+    for (uint64_t i = 1; i < data_job->R - 1; i++) {
+      for (uint64_t j = 1; j < data_job->C - 1; j++) {
         // resta del calor para epsilon
-        rest_heat = heat_dat[i][j].current_warm - heat_dat[i][j].past_warm;
+        rest_heat = heat[i][j].current_warm - heat[i][j].past_warm;
 
         // Verificar si el sistema aún no está equilibrado
-        if (fabs(rest_heat) > plate_data->epsilon) {
-          plate_data->balance = 0;  // El sistema no está equilibrado, continuar
+        if (fabs(rest_heat) > data_job->epsilon) {
+          data_job->balance = 0;  // El sistema no está equilibrado, continuar
         }
+          heat[i][j].past_warm = heat[i][j].current_warm;
       }
     }
-
-    // Actualizar los valores de `past_warm` y continuar el ciclo
-    if (plate_data->balance == 0) {
-      for (uint64_t i = 1; i < plate_data->R - 1; i++) {
-        for (uint64_t j = 1; j < plate_data->C - 1; j++) {
-          heat_dat[i][j].past_warm = heat_dat[i][j].current_warm;
-        }
-      }
-    }
-    cycles++;  // Incrementamos el contador de ciclos
+    cycles++;
   }
-  plate_data->report = cycles;
+  data_job->report = cycles;
+  free(threads);
+  free(private_data);
 }
 
-void make_free(data_job_t* plate_data, data_array_t* dat) {
-  free(plate_data);
-  free(dat);
+void* make_heat(void* data) {
+  private_data_t* private_data = (private_data_t*)data;
+  shared_data_t* shared_data = private_data->shared_data;
+  heat_t** heat = shared_data->heat;
+  data_job_t* data_job = shared_data->data_job;
+
+  double auxiliar = 0;
+
+  size_t thread_number = private_data->thread_number;
+  size_t thread_count = shared_data->thread_count;
+
+  uint64_t rows_per_thread = data_job->R / thread_count;
+  uint64_t remainder = data_job->R % thread_count;
+
+  uint64_t start = thread_number * rows_per_thread +
+    (thread_number < remainder ? thread_number : remainder);
+  uint64_t end = start + rows_per_thread + (thread_number < remainder ? 1 : 0);
+
+  if (start == 0) start = 1;
+  if (end >= data_job->R) end = data_job->R - 1;
+
+  // Iterar sobre las celdas de la matriz, excepto las fronteras
+  for (uint64_t i = start; i < end; i++) {
+    for (uint64_t j = 1; j < data_job->C - 1; j++) {
+      // Calcular el cambio en el calor
+      auxiliar = data_job->burn * (heat[i-1][j].past_warm +
+        heat[i][j-1].past_warm +
+        heat[i][j+1].past_warm +
+        heat[i+1][j].past_warm - (4 * heat[i][j].past_warm));
+        heat[i][j].current_warm = heat[i][j].current_warm + auxiliar;
+    }
+  }
+  return NULL;
+}
+
+void make_free(data_job_t* data_job, data_array_t* data_array,
+  shared_data_t* shared_data) {
+  free(shared_data);
+  free(data_job);
+  free(data_array);
 }
 
 heat_t** matrix(int filas, int columnas) {
-  struct heat **matriz = calloc(filas * sizeof(struct heat *), sizeof(double));
-  if (matriz == NULL) {
+  heat_t** heat = calloc(filas, sizeof(heat_t*));
+  if (heat == NULL) {
       perror("No se pudo asignar memoria para los punteros a las filas");
       exit(EXIT_FAILURE);
   }
   for (int i = 0; i < filas; i++) {
-    matriz[i] = malloc(columnas * sizeof(struct heat));
-    if (matriz[i] == NULL) {
+    heat[i] = malloc(columnas * sizeof(struct heat));
+    if (heat[i] == NULL) {
         perror("No se pudo asignar memoria para una fila");
         // Liberar memoria ya asignada
-        free_matrix(matriz, i);
+        free_matrix(heat, i);
         exit(EXIT_FAILURE);
       }
   }
-  return matriz;
+  return heat;
 }
 
-void free_matrix(heat_t** matrix, int filas) {
+void free_matrix(heat_t** heat, int filas) {
   for (int i = 0; i < filas; i++) {
-    free(matrix[i]);
+    free(heat[i]);
 }
-free(matrix);
+free(heat);
 }
 
 int analyze_arguments(char* filename, size_t filename_size, char* job,

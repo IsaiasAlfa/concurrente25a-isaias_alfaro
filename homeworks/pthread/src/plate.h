@@ -11,6 +11,13 @@
 #include "ethread.h"
 
 
+typedef struct shared_data {
+    heat_t** heat;
+    data_job_t* data_job;
+    uint64_t thread_count;
+}shared_data_t;
+
+
 /**
  * @brief Crea y gestiona los datos para la simulación de calor.
  *
@@ -34,7 +41,7 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
  * @param cont_array Puntero a un entero que cuenta el número de datos procesados.
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
  */
-void make_matrix(struct data_job *plate_data, struct data_array *dat,
+void make_matrix(data_job_t *plate_data, data_array_t *dat,
     int *cont_array, char job[]);
 
 /**
@@ -46,7 +53,7 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
  * @param plate_data Estructura que contiene la información de la placa.
  * @param heat_data Matriz que contiene los datos de calor actuales y pasados.
  */
-void make_heat(struct data_job *plate_data, struct heat **heat_data);
+void make_heat(data_job_t *plate_data, heat_t **heat_data);
 
 /**
  * @brief Libera la memoria asignada para las estructuras de datos.
@@ -57,7 +64,7 @@ void make_heat(struct data_job *plate_data, struct heat **heat_data);
  * @param plate_data Estructura que contiene la información de la placa.
  * @param dat Array de datos que se utilizarán en la simulación.
  */
-void make_free(struct data_job *plate_data, struct data_array *dat);
+void make_free(data_job_t *plate_data, data_array_t *dat);
 
 /**
  * @brief Crea la matriz para la simulacion
@@ -68,7 +75,7 @@ void make_free(struct data_job *plate_data, struct data_array *dat);
  * @param filas Int que me dice las filas de la matriz
  * @param columnas Int que me cuenta las columnas de la matriz.
  */
-struct heat **matrix(int filas, int columnas);
+heat_t **matrix(int filas, int columnas);
 
 /**
  * @brief Liberar la memoria de la matriz
@@ -79,7 +86,7 @@ struct heat **matrix(int filas, int columnas);
  * @param filas Int que me dice las filas de la matriz
  * @param matrix Puntero que me da donde inicia la matriz.
  */
-void free_matrix(struct heat **matrix, int filas);
+void free_matrix(heat_t **matrix, int filas);
 
 int analyze_arguments(char* filename, size_t filename_size, char* job,
     size_t job_size, uint64_t* thread_count);

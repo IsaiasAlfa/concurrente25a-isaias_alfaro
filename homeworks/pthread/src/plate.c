@@ -3,9 +3,8 @@
 #include <plate.h>
 
 void make_data(const char *filename, char job[], uint64_t thread_count) {
-  struct data_job *plate_data = calloc(sizeof(struct data_job), sizeof(double));
-  struct data_array *dat = calloc(sizeof(struct data_array) * 40,
-    sizeof(double));
+  data_job_t* plate_data = (data_job_t*) calloc(1, sizeof(data_job_t));
+  data_array_t* dat = calloc(sizeof(struct data_array) * 40, sizeof(double));
 
   int cont_array = 0;
   if (plate_data == NULL || dat == NULL) {
@@ -20,8 +19,8 @@ void make_data(const char *filename, char job[], uint64_t thread_count) {
   make_matrix(plate_data, dat, &cont_array, job);
 }
 
-void make_matrix(struct data_job *plate_data, struct data_array *dat,
-    int * cont_array, char job[]) {
+void make_matrix(data_job_t* plate_data, data_array_t* dat,
+    int* cont_array, char job[]) {
   int position = *cont_array;
   char job_filename[104];
   mkdir("out", 0777);
@@ -45,7 +44,7 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
   make_free(plate_data, dat);
 }
 
-void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
+void make_heat(data_job_t* plate_data, heat_t** heat_dat) {
   double cycles = 0;
   double auxiliar = 0;
   double rest_heat = 0;
@@ -95,12 +94,12 @@ void make_heat(struct data_job *plate_data, struct heat **heat_dat) {
   plate_data->report = cycles;
 }
 
-void make_free(struct data_job *plate_data, struct data_array *dat) {
+void make_free(data_job_t* plate_data, data_array_t* dat) {
   free(plate_data);
   free(dat);
 }
 
-struct heat **matrix(int filas, int columnas) {
+heat_t** matrix(int filas, int columnas) {
   struct heat **matriz = calloc(filas * sizeof(struct heat *), sizeof(double));
   if (matriz == NULL) {
       perror("No se pudo asignar memoria para los punteros a las filas");
@@ -118,7 +117,7 @@ struct heat **matrix(int filas, int columnas) {
   return matriz;
 }
 
-void free_matrix(struct heat **matrix, int filas) {
+void free_matrix(heat_t** matrix, int filas) {
   for (int i = 0; i < filas; i++) {
     free(matrix[i]);
 }

@@ -12,15 +12,15 @@
 /**
 * @brief Estructura que representa las temperaturas actuales y pasadas en un punto de una placa.
 */
-struct heat {
+typedef struct heat {
   double past_warm;     // < Temperatura pasada del punto.
   double current_warm;  // < Temperatura actual del punto.
-};
+}heat_t;
 
 /**
 * @brief Estructura que contiene los datos de la placa y parámetros para la simulación de calor.
 */
-struct data_job {
+typedef struct data_job {
   double time;        // < Tiempo de simulación.
   double material;    // < Propiedad del material.
   double area;        // < Área de la placa.
@@ -29,18 +29,18 @@ struct data_job {
   uint64_t C;         // < Número de columnas de la matriz de la placa.
   int balance;        // < Bool Indicador de equilibrio térmico.
   int report;         // < Contador de iteraciones o reportes en la simulación.
-};
+} data_job_t;
 
 /**
 * @brief Estructura que almacena los datos leídos desde un archivo para la simulación.
 */
-struct data_array {
+typedef struct data_array {
   char plate[20];          // < Nombre de la placa o etiqueta.
   double value_time;       // Valor de tiempo leído del archivo.
   double value_material;   // Valor del material leído del archivo.
   double value_area;  //< Valor del área leído del archivo.
   double value_epsilon;  // < Valor de la tolerancia epsilon.
-};
+} data_array_t;
 
 /**
  * @brief Imprime el contenido de un array de datos.

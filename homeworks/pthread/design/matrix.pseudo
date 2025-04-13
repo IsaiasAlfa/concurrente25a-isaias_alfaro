@@ -1,100 +1,71 @@
-Función make_data(nombre_archivo):
-    // Asignar memoria para plate_data y dat
-    plate_data <- asignar memoria para estructura M
-    dat <- asignar memoria para array de 20 estructuras data_array
-
-    // Verificar si la asignación de memoria fue exitosa
-    Si plate_data es NULL o dat es NULL:
-        Mostrar error de asignación de memoria
-        Liberar plate_data y dat
-        Terminar la función
-
+procedure make_data(filename)
     // Buscar y cargar datos desde el archivo
-    jobs_find_file(nombre_archivo, dat, cont_array)
+    jobs_find_file(filename, dat, cont_array)
 
     // Crear matrices y procesar datos
     make_matrix(plate_data, dat, cont_array)
 
     // Liberar recursos
     make_free(plate_data, dat)
+end procedure
 
-
-Función make_matrix(plate_data, dat, cont_array):
-    posición <- valor de cont_array
-
-    Para i desde 0 hasta 2:
+procedure make_matrix(plate_data, dat, cont_array)
+    for to max_entrys do
         // Cargar datos de la placa
         plate_charge_RC(plate_data, i, dat)
-
-        filas <- valor de plate_data->R
-        columnas <- valor de plate_data->C
-
-        // Asignar memoria para heat_data
-        heat_data <- asignar memoria para matriz de heat de tamaño filas * columnas
-
-        // Verificar si la asignación de memoria fue exitosa
-        Si heat_data es NULL:
-            Mostrar error de asignación de memoria
-            Terminar la función
 
         // Cargar datos de calor
         plate_charge_heat(i, dat, heat_data)
 
-        // Calcular y actualizar la distribución de calor
-        make_heat(plate_data, heat_data)
+        // Creacion del equipo de hilos
+        heat_team(shared_data)
 
-        // Liberar memoria de heat_data
-        Liberar heat_data
+    end for
+end procedure
 
-Función make_heat(plate_data, heat_data):
+procedure shared_data(shared_data)
 
-    burn <- (plate_data->time * plate_data->material) / (plate_data->area * plate_data->area)
-    plate_data->report <- 0
+// ver si se alcanzo el balance
+while (!balance)
+    // creacion de equipos
+    mutable teams := Create_threads(team_count, make_heat)
+    // esperar por que termine el trabajo
+    join_thread(teams)
 
+    // ver si se alcanzo el balance y actualizar la matriz
+    for i := 1 to plate_data->R - 1 do
+        for j ;= 1 to plate_data->C - 1 do
+            if rest_heat < epsilon do
+                balance := true;
+            end if
+            update_heat
+        end for
+    end for
+end procedure
 
-    Si plate_data->R <= 1 o plate_data->C <= 1:
-        Mostrar error de dimensiones de matriz
-        Terminar la función
+procedure make_heat(plate_data, heat_data)
+// cantidad de filas de cada hilo
+rows_max = rows / thread_count
+// inicio de cada hilo
+star = thread_number * rows_max
+// fin de cada hilo
+fin = thread_number + 1 * rows_max
+    // trabajo de simmulacion de cada hilo
+    for i := star to fin do
+        for j := 1 hasta plate_data->C - 1 do
+            // Calcular la nueva temperatura
+            auxiliar <- burn * (heat_data[mov - 1].past_warm +
+                heat_data[mov - plate_data->C].past_warm +
+                heat_data[mov + 1].past_warm +
+                heat_data[mov + plate_data->C].past_warm -
+                4 * heat_data[mov].past_warm)
+        end for
+    end for
+end procedure
 
-    // Inicializar contador
-    conta <- 0
-
-    Mientras plate_data->balance != 1:
-        Incrementar plate_data->report
-
-        Para i desde 1 hasta plate_data->R - 2:
-            Para j desde 1 hasta plate_data->C - 2:
-                mov <- (i * plate_data->C + j)
-
-                // Calcular la nueva temperatura
-                auxiliar <- burn * (heat_data[mov - 1].past_warm +
-                                    heat_data[mov - plate_data->C].past_warm +
-                                    heat_data[mov + 1].past_warm +
-                                    heat_data[mov + plate_data->C].past_warm -
-                                    4 * heat_data[mov].past_warm)
-                auxiliar <- heat_data[mov].past_warm + auxiliar
-
-                // Actualizar temperaturas
-                heat_data[mov].past_warm <- heat_data[mov].current_warm
-                heat_data[mov].current_warm <- auxiliar
-
-                // Verificar el cambio en la temperatura
-                auxiliar_heat <- |heat_data[mov].current_warm - heat_data[mov].past_warm|
-                Si plate_data->balance es 0 y auxiliar_heat < plate_data->epsilon y conta != 0:
-                    plate_data->balance <- 1
-                    
-        Incrementar conta
-    // Restablecer el estado de equilibrio
-    plate_data->balance <- 0
-
-    // Imprimir la matriz de calor final
-    Para i desde 0 hasta plate_data->R - 1:
-        Para j desde 0 hasta plate_data->C - 1:
-            mov <- (i * plate_data->C + j)
-            Mostrar heat_data[mov].current_warm
-        Mostrar nueva línea
-
-
-Función make_free(plate_data, dat):
-    Liberar memoria de plate_data
-    Liberar memoria de dat
+procedure analyze_arguments(filename, thread_count)
+    // se guarda el primer argumento
+    filename := integer(argv[1])
+    // se guarda el segundo argumento 
+    shared thread_count := integer(argv[2])
+end procedure

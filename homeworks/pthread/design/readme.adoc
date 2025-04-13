@@ -14,7 +14,7 @@
 
 == Diseño
 
-image::./images/Serial_heat.svg[UML]
+image::./images/UML.svg[UML]
 
 ---
 
@@ -24,13 +24,31 @@ image::./images/Serial_heat.svg[UML]
 
 === Structs
 
-En el programa existen tres structs.
+El color morado pertenece a estos structs.
 
 heat:: Esta estructura se utiliza para la matriz en la que se almacenan los dos momentos de calor, permitiendo avanzar en la simulación. Esto se debe a que se requieren tanto el estado actual como el siguiente momento, luego de completar un ciclo de simulación.
 
 data_job:: Esta estructura almacena los datos de la placa y otros parámetros necesarios para la simulación actual. Se va sobreescribiendo a medida que avanzan las pruebas.
 
 data_array:: Esta estructura contiene todos los datos extraídos del archivo job, con el propósito de abrir el archivo solo una vez y evitar operaciones repetidas de lectura.
+
+=== Structs de hilos
+
+El color naranja pertenece a estos structs.
+
+shared_data:: Estructura que contiene los datos que van a compartir los hilos para su ejecución.
+
+private_data:: Estructura que contiene los datos privados del hilo y puntero al mismo.
+
+---
+
+image::./images/Threats.svg[Hilos]
+
+== Pthread
+
+El programa hará uso de pthreads, una biblioteca que permite la utilización de hilos (threads), los cuales ayudan a paralelizar tareas y crear concurrencia en los programas. En este caso, se aplicará seguridad condicional, que se basa en la reparticion de trabajo en distintas partes de la memoria. Con el objetivo de aumentar la velocidad de las simulaciones.
+
+En la imagen se observa cómo el método crea los hilos y los envía a trabajar. Cuando terminan, se vuelven a crear si es necesario otro conjunto para una nueva iteración, y se repite el proceso hasta alcanzar el equilibrio.
 
 === Metodos
 
@@ -40,6 +58,16 @@ Make_data:: Crea y gestiona los datos para la simulación de calor. Asigna memor
 
 Make_matrix:: Crea la matriz de datos de calor y gestiona el proceso de simulación. Llama a las funciones para cargar datos y crear matrices de calor
 
-Make_heat:: Calcula y actualiza la distribución de calor en la placa. Utiliza el método de difusión para calcular la distribución del calor en la placa hasta que se alcanza el equilibrio.
+Heat_team:: Crea un equipo de hilos, estos son enviados a trabjar una fila especifica de la placa.
+
+Make_heat:: Calcula y actualiza la distribución de calor en la placa. Utiliza el método de difusión para calcular la distribución del calor en la placa.
 
 job_out_file:: Escribe los resultados en el archvio job y su respectivo plate.
+
+== Solución es pseudocodigo
+
+[#pseudocode]
+[source,delphi]
+----
+include::matrix.pseudo[]
+----

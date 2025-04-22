@@ -9,7 +9,12 @@ DispatcherTest::DispatcherTest(int dispatcherDelay)
 
 int DispatcherTest::run() {
   // Dispatch all the network messages we receive to their respective queues
-  this->consumeLoop();
+  // Stop until two consecutive stop conditions are received
+  while (this->stopConditionCount < 2) {
+    this->consumeLoop();
+    ++this->stopConditionCount;
+    this->toQueues[this->toQueues.size()]->enqueue(this->stopCondition);
+  }
 
   // If we exited from the forever loop, the finish message was received
   // For this simulation is OK to propagate it to all the queues
@@ -18,6 +23,11 @@ int DispatcherTest::run() {
   }
 
   return EXIT_SUCCESS;
+}
+
+void DispatcherTest::consume(NetworkMessage data) {
+  Dispatcher::consume(data);
+  this->stopConditionCount = 0;
 }
 
 int DispatcherTest::extractKey(const NetworkMessage& data) const {

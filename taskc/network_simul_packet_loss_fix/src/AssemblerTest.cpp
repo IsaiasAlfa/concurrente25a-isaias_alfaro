@@ -35,7 +35,7 @@ void AssemblerTest::consume(NetworkMessage data) {
   if (Util::random(0.0, 100.0) < this->packetLossProbability) {
     ++this->lostMessages;
   } else {
-    data.target = Util::random(1, this->consumerCount + 1);
+    // data.target = Util::random(1, this->consumerCount + 1);
     this->produce(data);
   }
 }

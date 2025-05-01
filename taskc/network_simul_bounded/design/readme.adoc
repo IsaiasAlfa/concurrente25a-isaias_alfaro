@@ -1,0 +1,27 @@
+= Design of solution
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
+image::network_simul_packet_loss.svg[]
+
+
+[#pseudocode]
+
+Buffer acotado:
+
+[source,delphi]
+----
+include::prodcons_bounded.pseudo[]
+----
+
+Buffer no acotado:
+
+[source,delphi]
+----
+include::prodcons_unbounded.pseudo[]
+----
+

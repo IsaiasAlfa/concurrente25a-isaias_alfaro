@@ -22,6 +22,8 @@ class Queue {
  protected:
   /// All read or write operations are mutually exclusive
   std::mutex mutex;
+  /// Indicates if there are room to store more elements in the queue
+  Semaphore canProduce;
   /// Indicates if there are consumable elements in the queue
   Semaphore canConsume;
   /// Contains the actual data shared between producer and consumer
@@ -29,18 +31,19 @@ class Queue {
 
  public:
   /// Constructor
-  Queue()
-    : canConsume(0) {
+  explicit Queue(const unsigned queueCapacity = SEM_VALUE_MAX)
+    : canProduce(queueCapacity)
+    , canConsume(0) {
   }
 
   /// Destructor
   ~Queue() {
-    // TODO(jhc): clear()?
   }
 
   /// Produces an element that is pushed in the queue
   /// The semaphore is increased to wait potential consumers
   void enqueue(const DataType& data) {
+    this->canProduce.wait();
     this->mutex.lock();
     this->queue.push(data);
     this->mutex.unlock();
@@ -56,6 +59,7 @@ class Queue {
     DataType result = this->queue.front();
     this->queue.pop();
     this->mutex.unlock();
+    this->canProduce.signal();
     return result;
   }
 };

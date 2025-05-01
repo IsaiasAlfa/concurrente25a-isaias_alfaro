@@ -4,6 +4,7 @@
 #define CONSUMER_HPP
 
 #include <cassert>
+#include <climits>
 
 #include "Queue.hpp"
 #include "Thread.hpp"
@@ -33,14 +34,14 @@ class Consumer : public virtual Thread {
   /// @see stopCondition
   explicit Consumer(Queue<DataType>* consumingQueue = nullptr
     , const DataType& stopCondition = DataType()
-    , bool createOwnQueue = false)
+    , bool createOwnQueue = false, const unsigned queueCapacity = SEM_VALUE_MAX)
     : consumingQueue(consumingQueue)
     , stopCondition(stopCondition)
     , ownsQueue(createOwnQueue) {
     // Error if asked to create own queue and provided an existing one to use
     assert(!(createOwnQueue && consumingQueue));
     if (createOwnQueue) {
-      this->createOwnQueue();
+      this->createOwnQueue(queueCapacity);
     }
   }
 
@@ -62,9 +63,9 @@ class Consumer : public virtual Thread {
   }
 
   /// Creates a new empty queue owned by this consumer
-  void createOwnQueue() {
+  void createOwnQueue(const unsigned queueCapacity = SEM_VALUE_MAX) {
     assert(this->consumingQueue == nullptr);
-    this->consumingQueue = new Queue<DataType>();
+    this->consumingQueue = new Queue<DataType>(queueCapacity);
     this->ownsQueue = true;
   }
 

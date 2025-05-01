@@ -26,8 +26,20 @@
 |11 |link:ejemplos/pthreads/hello_order_cond_safe[hello_order_cond_safe] |Ejemplo de clase |Programa que imprime un saludo desde un hilo en orden controlado por seguridad condicional.
 |12 |link:ejemplos/pthreads/building_tasks[building_tasks] |Ejemplo de clase |Programa que sigue un orden de tareas mediante semaforos.
 |13 |link:ejemplos/pthreads/position_race[position_race] |Ejemplo comentado| Programa que simula una carrera de hilos con un mutex para la impresion.
-|13 |link:ejemplos/pthreads/birthday_pinata[birthday_pinata] |Extraclase |Programa que simula como unos hilos se turnan con un mutex para romper una piñata.
-|13 |link:ejemplos/pthreads/prod_cons_bound[prod_cons_bound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con dos hilos y controlados con semaforos.
+|14 |link:ejemplos/pthreads/birthday_pinata[birthday_pinata] |Extraclase |Programa que simula como unos hilos se turnan con un mutex para romper una piñata.
+|15 |link:ejemplos/pthreads/prod_cons_bound[prod_cons_bound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con dos hilos y controlados con semaforos.
+|15 |link:ejemplos/pthreads/prod_cons_unbound[prod_cons_unbound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con una cola no acotada.
+|===
+
+== tasks
+
+[%autowidth]
+|===
+|1 |link:taskc/network_simul_packet_loss[packet_loss] |Ejemplo de clase | Programa que simula una linea de produccion y un ensamblador que pierde los paquetes en la red.
+|2 |link:taskc/network_simul_packet_loss_fix[packet_loss_fix] |Ejemplo de clase | Programa que arregla el problema de paquetes faltantes en las lineas de produccion.
+|3 |link:taskc/network_simul_packet_loss2[packet_loss2] |Ejemplo de clase | Otra forma de resolver el primer programa de packet_loss.
+|4 |link:taskc/network_simul_producers[producers] |Ejemplo de clase | Programa packet_loss pero ahora se crea mas de un productor.
+|5 |link:taskc/network_simul_bounded[bounded] |Ejemplo de clase | Programa packet_loss que acota la cola de cada consumidor.
 |===
 
 == Tareas
@@ -36,6 +48,7 @@
 |===
 |# |ID |Descripcion 
 |1 |link:homeworks/serial[serial_heat_transfer] | Tarea serial que simula la transferencia de calor en una lamina de un material en específico.
+|2 |link:homeworks/pthread[concurrent_heat_transfer] | Tarea concurrente que simula la transferencia de calor en una lamina de un material en específico.
 |===
 
 == Glosario

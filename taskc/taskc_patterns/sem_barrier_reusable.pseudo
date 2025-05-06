@@ -1,0 +1,19 @@
+procedure main()
+  ...
+  // Stops all threads, but the first one that passess it passess the rest
+  shared turnstile := create_semaphore(0)
+  ...
+end procedure
+
+procedure secondary()
+  while true do
+    Statement A
+    ...
+    // Use turnstile
+    wait(turnstile)
+    signal(turnstile)
+    ...
+    // Statement B can be only executed until all threads have run Statement A
+    Statement B
+  end while
+end procedure

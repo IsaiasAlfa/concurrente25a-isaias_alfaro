@@ -1,0 +1,13 @@
+procedure main()
+  shared count := 0
+  create_thread(thread_a)
+  create_thread(thread_b)
+end procedure
+
+procedure thread_a()
+  count := count + 1
+end procedure
+
+procedure thread_b()
+  count := count + 1
+end procedure

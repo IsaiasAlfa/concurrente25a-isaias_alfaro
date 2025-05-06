@@ -1,0 +1,14 @@
+procedure main()
+  create_thread(thread_a)
+  create_thread(thread_b)
+end procedure
+
+procedure thread_a()
+  statement a1
+  statement a2
+end procedure
+
+procedure thread_b()
+  statement b1
+  statement b2
+end procedure

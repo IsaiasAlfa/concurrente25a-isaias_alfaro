@@ -1,0 +1,9 @@
+procedure main()
+  input const skater_count, const room_capacity
+  create_threads(skater_count, skater)
+end procedure
+
+procedure skater()
+  // Concurrency-bounded region
+  skate()
+end procedure

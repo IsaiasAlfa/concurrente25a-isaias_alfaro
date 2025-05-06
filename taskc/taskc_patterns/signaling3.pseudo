@@ -1,4 +1,6 @@
 procedure main()
+  shared a1_ready := sempahore(0)
+  shared b1_ready := sempahore(0)
   create_thread(thread_a)
   create_thread(thread_b)
   create_thread(thread_c)
@@ -6,12 +8,16 @@ end procedure
 
 procedure thread_a()
   statement a1
+  signal(a1_ready)
 end procedure
 
 procedure thread_b()
+  wait(a1_ready)
   statement b1
+  signal(b1_ready)
 end procedure
 
 procedure thread_c()
+  wait(b1_ready)
   statement c1
 end procedure

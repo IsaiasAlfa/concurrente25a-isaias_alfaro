@@ -20,7 +20,7 @@ Dos _threads_ ejecutan las siguientes tareas. Liste todas las rutas de ejecució
 include::execution_paths.pseudo[]
 ----
 
-*Respuesta*:
+*Respuesta*: El valor es 5, 5 y 7;
 
 ****
 include::execution_paths.adoc[]
@@ -43,13 +43,15 @@ include::for_count.pseudo[]
 . ¿Cuál es el valor más grande que la variable compartida `count` podría llegar a obtener? ¿En qué rutas de ejecución se alcanza este valor?
 +
 ****
-*Respuesta*: 
+*Respuesta*: 10000, esto se logra que los hilos sean serializados, como por ejemplo solo una CPU.
 ****
 
 . ¿Cuál es el menor valor que la variable compartida `count` podría llegar a obtener? ¿En qué rutas de ejecución se alcanza este valor?
 +
 ****
-*Respuesta*: 
+*Respuesta*: 100: 
+Concurrencia perfecta, todos acceden y dan el mismo valor a la variable compartida.
+Cuando se crean 100 hilos, un solo hilo quedo con su variable local en 0 y sobreescribe la variable count con este 0 luego de que todos los 99 hilos terminaran.
 ****
 
 
@@ -90,7 +92,7 @@ include::signalingw.pseudo[]
 ----
 
 Una solución a este problema se había hecho antes en el curso ¿recuerda en cuál ejemplo? +
-*Respuesta*: 
+*Respuesta*: hello_order_semaphore
 
 
 

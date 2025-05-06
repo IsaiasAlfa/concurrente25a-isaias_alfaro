@@ -1,0 +1,23 @@
+Ruta 1: Imprime 5 y queda 7 en x
+
+----
+x := 5
+print (5)
+x := 7
+----
+
+Ruta 2: Imprime 5 y queda 5 en x
+
+----
+x := 7
+X := 5
+print (5)
+----
+
+Ruta 2: Imprime 5 y queda 5 en x (intercaladas)
+
+----
+x := 5
+X := 7
+print (7)
+----

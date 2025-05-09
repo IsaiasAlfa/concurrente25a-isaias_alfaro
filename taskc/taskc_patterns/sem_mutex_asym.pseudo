@@ -1,13 +1,18 @@
 procedure main()
+  shared can_count := semaphore(1)
   shared count := 0
   create_thread(thread_a)
   create_thread(thread_b)
 end procedure
 
 procedure thread_a()
+  wait(can_count)
   count := count + 1
+  signal(can_count)
 end procedure
 
 procedure thread_b()
+  wait(can_count)
   count := count + 1
+  signal(can_count)
 end procedure

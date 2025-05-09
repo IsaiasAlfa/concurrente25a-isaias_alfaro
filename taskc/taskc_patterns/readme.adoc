@@ -199,5 +199,12 @@ Un torniquete es un semáforo que detiene a todos los hilos que lleguen a él. P
 
 [source,delphi,linenums]
 ----
-include::sem_barrier_reusable.pseudo[]
+include::sem_barrier_reusable2.pseudo[]
+----
+
+Otra variacion de una barrera reusable es 
+
+[source,delphi,linenums]
+----
+include::sem_barrier_pass_reusable.pseudo[]
 ----

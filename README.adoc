@@ -161,7 +161,10 @@ Es un entero que permite controlar a los hilos, genera wait hasta que el semafor
 ** Ejemplo
 * Un semaforo esta en 2 pasa un hilo y lo decrementa, luego pasa otro y lo baja. Esta en 0 el proximo hilo llega y al estar en 0 no lo deja pasar, ya que lo baja y pasa a -1.
 
-*15.Barrera.*
+*15.Barrera.* 
+
+** Ejemplo
+* Aguja que espera a que llegue una cantidad especifica de carros para dejarlos continuar, lo que genera que todos los carros avancen juntos al levantar la barrera
 
 *16.Variable de condición.*
 

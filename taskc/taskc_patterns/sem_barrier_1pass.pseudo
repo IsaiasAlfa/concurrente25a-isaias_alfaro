@@ -6,14 +6,21 @@ procedure main()
   // Locked (0) until all threads arrive, then it is unlocked (1)
   shared barrier := create_semaphore(0)
   // Read thread count from standard input
-  input shared const thread_count
+  input shared const thread_count as integer
   // Create a thread team running secondary
-  create_threads(thread_count, secondary)
+  join_threads(create_threads(thread_count, secondary))
 end procedure
 
 procedure secondary()
   Statement A
-  // Adapt rendezvous solution here
+  // if I am the last one thread to arraive the barrier
   // Statement B can be only executed until all threads have run Statement A
+  wait(can_access_count)
+    count = count + 1
+    if count = thread_count then
+      signal(barrier, thread_count)
+    end if
+  signal(can_access_count)
+  wait(barrier)
   Statement B
 end procedure

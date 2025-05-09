@@ -1,10 +1,13 @@
 procedure main()
+  shared can_acces_count := semaphore(1);
   shared count := 0
-  input const thread_count
-  create_threads(thread_count, secondary)
+  input const thread_count as integer
+  join_threads(create_threads(thread_count, secondary))
 end procedure
 
 procedure secondary()
   // Critical section
+  wait(can_acces_count)
   count := count + 1
+  signal(can_acces_count)
 end procedure

@@ -1,0 +1,23 @@
+= Estadísticas concurrentes
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+Se dispone de un programa serial que analiza datos numéricos provistos en la entrada estándar de diferente naturaleza y separados por espaciado en blanco. El programa es capaz de trabajar con grandes cantidades de datos (limitados a la capacidad de la memoria principal) y reporta estadísticos descriptivos básicos:
+
+. Conteo de valores.
+. El valor mínimo.
+. El valor máximo.
+. El promedio (media aritmética).
+. La desviación estándar.
+. La mediana.
+
+El conteo siempre es entero, el máximo y mínimo del mismo tipo de datos de la entrada (indicado en la primera línea de la entrada), y los últimos tres estadísticos siempre son de punto flotante.
+
+Sin embargo, cuando la cantidad de datos a analizar es enorme, el programa tarda tiempo considerable y desaprovecha núcleos de procesador ociosos en el sistema. Paralelice los algoritmos estadísticos para incrementar el desempeño. Use reducciones de OpenMP. Sugerencia: realice análisis dinámico de código (_profiling_).
+
+Registre tiempos de ejecución, calcule incrementos de velocidad y la eficiencia, para demostrar a su cliente los logros de la paralelización.

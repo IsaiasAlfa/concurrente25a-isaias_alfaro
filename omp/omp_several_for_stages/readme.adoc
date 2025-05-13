@@ -1,0 +1,43 @@
+= Repartir y mapear las iteraciones
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+Modifique el programa dado para realizar tres etapas o fases de iteración. Es decir, tres ciclos `for` independientes uno tras otro. En cada ciclo se realiza la misma cantidad de iteraciones.
+
+Optimice el programa para reutilizar los hilos. Es decir, en cada ciclo no cree ni destruya hilos, sino que créelos antes del primer ciclo y destrúyalos después del tercer ciclo. En cada ciclo los hilos son reutilizados.
+
+El programa debe imprimir en la salida estándar la etapa en la que se encuentra, el número de hilo y las iteraciones que realizó. Las etapas siempre deben aparecer en orden y separadas entre ellas por un único cambio de línea. Por ejemplo, para repartir 5 iteraciones entre 2 hilos en las tres etapas, una salida podría ser:
+
+[source,txt]
+----
+$ ./several_for 2 5
+stage 1: 0/2: iteration 0/5
+stage 1: 1/2: iteration 3/5
+stage 1: 1/2: iteration 4/5
+stage 1: 0/2: iteration 1/5
+stage 1: 0/2: iteration 2/5
+
+stage 2: 1/2: iteration 3/5
+stage 2: 1/2: iteration 4/5
+stage 2: 0/2: iteration 0/5
+stage 2: 0/2: iteration 1/5
+stage 2: 0/2: iteration 2/5
+
+stage 3: 1/2: iteration 3/5
+stage 3: 1/2: iteration 4/5
+stage 3: 0/2: iteration 0/5
+stage 3: 0/2: iteration 1/5
+stage 3: 0/2: iteration 2/5
+----
+
+En el ejemplo provisto, las tres etapas (_stages_) de secciones `omp for` son redundantes. Mofique este código para que el usuario pueda indicar la cantidad de etapas como tercer argumento de línea de comandos. Elimine el código redundante de la segunda y tercera etapa. Haga que su solución repita el código de una etapa, tantas veces como lo haya indicado el usuario. Asegúrese en cada etapa de repartir las iteraciones indicadas por el usuario en el segundo argumento de línea de comandos.
+
+No debe crear ni destruir hilos de ejecución entre una etapa y otra. Todos los hilos deben ser creados antes de iniciar la primera etapa, y destruidos una vez que la última etapa ha sido ejecutada. Las salidas de una etapa no deben mezclarse con las salidas de la siguiente.
+
+NOTE: La directiva `for` no define una nueva región paralela, y por tanto no crea una nueva cantidad de hilos ni los destruye. La directiva `for` debe estar dentro de una región paralelizada (`parallel` o `parallel for`) y puede repetirse tantas veces como guste. La directiva reparte las iteraciones del ciclo que le sigue entre los hilos que se crearon en la región paralela. Es decir, la directiva `for` reutiliza los hilos de la región paralela. La utilidad de esta directiva es evitar el _overhead_ de crear y destruir hilos entre ciclos `for`, uno tras otro, en un código fuente. Implícitamente cada directiva `omp for` incluye una barrera tras la instrucción o bloque que afecta.
+

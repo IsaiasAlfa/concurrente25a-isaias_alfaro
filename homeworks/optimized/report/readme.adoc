@@ -16,7 +16,7 @@
 |===
 |Iter. |Etiqueta |Duración (s) |_Speedup_ |Descripción corta
 |0 |Serial0 |78.612 |1.00 |Versión serial inicial (Tarea01)
-|1 |Serial1 | | |
+|1 |Serial1 |58.537 |1.34 |Versión con arrays en lugar de matrices (Tarea01)
 |2 | | | |
 |===
 
@@ -24,14 +24,33 @@
 [[serial_iter00]]
 === Versión serial original (Tarea01)
 
-#Describa aquí qué aspectos tenía la versión serial no eficientes que podrían o fueron opitimizados luego. También aspectos que usted considera eficientes, los cuales explicarían por qué no amerita una optimización.#
+image::images/Callgrind_map.jpg[map]
+
+La versión serial presenta dos grandes deficiencias: el manejo de archivos y el cálculo de las matrices. El primer aspecto es susceptible de optimización, ya que actualmente se abren los archivos múltiples veces. Para mejorar el rendimiento, se debería abrir cada archivo una sola vez, guardar la información necesaria y luego cerrarlo, en lugar de realizar múltiples aperturas. Al reducir estas operaciones, se disminuiría el tiempo de ejecución.
+
+En cuanto a las matrices, el problema radica en la necesidad de recorrerlas completamente para actualizar sus valores en cada nuevo ciclo. Sin embargo, considero que este cálculo es rápido y eficiente en comparación con el impacto del manejo de archivos.
 
 
 [[serial_iter01]]
 === Iteración 1
 
-#Para cada iteración del ciclo de optimización, cree una subsección como esta. Resuma en máximo un párrafo en qué consiste la optimización. Su objetivo es que quien lea este documento entienda claramente qué se intentó mejorar. Provea trocitos de código fuente o pseudocódigo que ayude a entender la optimización potencial. Indique si el intento logró incrementar el desempeño. En caso de no lograrlo, conjeture la causa. Eso ayudaría a ahorrar tiempo a otras personas que tengan la misma inquietud.#
+En esta iteración se cambió la estructura de datos que almacenaba la información de la placa. Se optó por utilizar dos arreglos que simulan ser una matriz, ya que esto mejora la eficiencia al evitar el costo asociado al acceso mediante índices en la msima. Un arreglo lineal no presenta este problema. Al implementarse esta esructura se aumento el rendimiento.
 
+[source, c]
+--
+void matrix(int filas, int columnas, struct data_job *plate_data) {
+  // array
+  double* past_warm = calloc(filas*columnas, sizeof(double));
+  double* current_warm = calloc(filas*columnas, sizeof(double));
+  plate_data->current_warm = current_warm;
+  plate_data->past_warm = past_warm;
+}
+
+void free_matrix(struct data_job *plate_data) {
+  free(plate_data->past_warm);
+  free(plate_data->current_warm);
+}
+--
 
 
 
@@ -41,8 +60,8 @@
 [%autowidth.stretch,options="header"]
 |===
 |Iter. |Etiqueta |Duración (s) |_Speedup_ |Eficiencia |Descripción corta
-|- |SerialI | |1.00 |1.00 |Versión serial final
-|1 |Conc0 | | | |Versión concurrente inicial (Tarea02)
+|- |SerialI |58.537 |1.00 |1.00 |Versión serial final
+|1 |Conc0 |1387.699 | |1.00 |Versión concurrente inicial (Tarea02)
 |2 | | | | |
 |3 | | | | |Versión concurrente final
 |===
@@ -51,7 +70,7 @@
 [[conc_iter00]]
 === Versión concurrente inicial (Tarea02)
 
-#Describa aquí qué aspectos tenía la versión concurrente (Tarea02) no eficientes que podrían o fueron opitimizados luego. También aspectos que usted considera eficientes, los cuales explicarían por qué no amerita una optimización.#
+La tarea02 presenta un problema importante: la creación y destrucción repetida de hilos en cada iteración de la simulación de la matriz. Este proceso genera una pérdida considerable de tiempo, especialmente notoria cuando la matriz tiene dimensiones pequeñas. La sobrecarga asociada a la gestión de hilos termina provocando un aumento significativo en el tiempo total de ejecución.
 
 [[conc_iter01]]
 === Iteración 1

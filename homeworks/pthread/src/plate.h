@@ -10,23 +10,24 @@
 #include "file.h"
 #include "ethread.h"
 
+
 /**
+ * @struct shared_data
  * @brief Estructura que almacena los datos compartidos de los hilos.
- * 
  */
 typedef struct shared_data {
-    heat_t** heat;
-    data_job_t* data_job;
-    uint64_t thread_count;
+    heat_t** heat;  // < Puntero a la matriz de la informacion de calor
+    data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
+    uint64_t thread_count;  // < Cantidad de hilos
 }shared_data_t;
 
 /**
+ * @struct private_data
  * @brief Estructura que almacena los datos privados de cada hilo.
- * 
  */
 typedef struct private_data {
-    uint64_t thread_number;
-    shared_data_t* shared_data;
+    uint64_t thread_number;  // < numero de hilo
+    shared_data_t* shared_data;  // < puntero a la informacion compartida
 }private_data_t;
 
 
@@ -80,11 +81,11 @@ void* make_heat(void* data);
 /**
  * @brief Libera la memoria asignada para las estructuras de datos.
  *
- * Libera la memoria asignada para las estructuras `plate_data` y `dat` para
+ * Libera la memoria asignada para las estructuras `data_job` y `data_array` para
  * evitar fugas de memoria.
  *
- * @param plate_data Estructura que contiene la información de la placa.
- * @param dat Array de datos que se utilizarán en la simulación.
+ * @param data_job Estructura que contiene la información de la placa.
+ * @param data_array Array de datos que se utilizarán en la simulación.
  * @param shared_data Estructura de datos compartidos.
  */
 void make_free(data_job_t* data_job, data_array_t* data_array,
@@ -108,7 +109,7 @@ heat_t** matrix(int filas, int columnas);
  * cada array.
  *
  * @param filas Int que me dice las filas de la matriz
- * @param matrix Puntero que me da donde inicia la matriz.
+ * @param heat Puntero de la matriz.
  */
 void free_matrix(heat_t** heat, int filas);
 

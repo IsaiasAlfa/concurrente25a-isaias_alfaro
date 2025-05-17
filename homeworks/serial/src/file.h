@@ -29,6 +29,8 @@ struct data_job {
   uint64_t C;         // < Número de columnas de la matriz de la placa.
   int balance;        // < Bool Indicador de equilibrio térmico.
   int report;         // < Contador de iteraciones o reportes en la simulación.
+  double* past_warm;
+  double* current_warm;
 };
 
 /**
@@ -93,7 +95,7 @@ void plate_charge_RC(struct data_job *plate_data, int position,
  * @param heat_data Puntero a la estructura `heat` donde se almacenarán los datos de calor cargados.
  */
 void plate_charge_heat(int position, struct data_array *dat,
-    struct heat **heat_data);
+    struct data_job *plate_data);
 
 /**
  * @brief Escribe los resultados en el archvio job y su respectivo plate.
@@ -104,7 +106,7 @@ void plate_charge_heat(int position, struct data_array *dat,
  * @param job Archivo al cual se le va a escribir la nueva informacion.
  * @param position Int para saber cual es la informacion del job correspondiente.
  */
-void jobs_out_file(struct data_array *dat, struct heat **heat_data,
+void jobs_out_file(struct data_array *dat,
     struct data_job *plate_data, FILE *job, int position);
 
 /**

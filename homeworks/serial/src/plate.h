@@ -44,7 +44,7 @@ void make_matrix(struct data_job *plate_data, struct data_array *dat,
  * @param plate_data Estructura que contiene la información de la placa.
  * @param heat_data Matriz que contiene los datos de calor actuales y pasados.
  */
-void make_heat(struct data_job *plate_data, struct heat **heat_data);
+void make_heat(struct data_job *plate_data);
 
 /**
  * @brief Libera la memoria asignada para las estructuras de datos.
@@ -66,7 +66,7 @@ void make_free(struct data_job *plate_data, struct data_array *dat);
  * @param filas Int que me dice las filas de la matriz
  * @param columnas Int que me cuenta las columnas de la matriz.
  */
-struct heat **matrix(int filas, int columnas);
+void matrix(int filas, int columnas, struct data_job *plate_data);
 
 /**
  * @brief Liberar la memoria de la matriz
@@ -77,6 +77,6 @@ struct heat **matrix(int filas, int columnas);
  * @param filas Int que me dice las filas de la matriz
  * @param matrix Puntero que me da donde inicia la matriz.
  */
-void free_matrix(struct heat **matrix, int filas);
+void free_matrix(struct data_job *plate_data);
 
 #endif  // SRC_MATRIX_H_ // Fin del guardia de inclusión

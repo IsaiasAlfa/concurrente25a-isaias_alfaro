@@ -17,7 +17,6 @@
  * @brief Estructura que almacena los datos compartidos de los hilos.
  */
 typedef struct shared_data {
-    heat_t** heat;  // < Puntero a la matriz de la informacion de calor
     data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
     uint64_t thread_count;  // < Cantidad de hilos
 }shared_data_t;
@@ -100,8 +99,9 @@ void make_free(data_job_t* data_job, data_array_t* data_array,
  *
  * @param filas Int que me dice las filas de la matriz
  * @param columnas Int que me cuenta las columnas de la matriz.
+ * @param plate_data Struct donde guardar los arrays.
  */
-heat_t** matrix(int filas, int columnas);
+void matrix(int filas, int columnas, struct data_job *plate_data);
 
 /**
  * @brief Liberar la memoria de la matriz
@@ -109,10 +109,9 @@ heat_t** matrix(int filas, int columnas);
  * Libera la memoria de la matriz, con un for para liberar correctamente 
  * cada array.
  *
- * @param filas Int que me dice las filas de la matriz
- * @param heat Puntero de la matriz.
+ * @param plate_data Struct donde estan los arrays.
  */
-void free_matrix(heat_t** heat, int filas);
+void free_matrix(struct data_job *plate_data);
 
 /**
  * @brief Metodo de analisis de argumentos.

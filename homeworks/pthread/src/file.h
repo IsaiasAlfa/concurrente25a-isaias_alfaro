@@ -10,14 +10,6 @@
 #include <string.h>
 
 /**
-* @brief Estructura que representa las temperaturas actuales y pasadas en un punto de una placa.
-*/
-typedef struct heat {
-  double past_warm;     // < Temperatura pasada del punto.
-  double current_warm;  // < Temperatura actual del punto.
-}heat_t;
-
-/**
 * @brief Estructura que contiene los datos de la placa y parámetros para la simulación de calor.
 */
 typedef struct data_job {
@@ -30,6 +22,8 @@ typedef struct data_job {
   int balance;        // < Bool Indicador de equilibrio térmico.
   int report;         // < Contador de iteraciones o reportes en la simulación.
   double burn;        // < Constante de calor en la simulacion
+  double* past_warm;  // < Array del calor pasado
+  double* current_warm;  // < Array del calor futuro
 } data_job_t;
 
 /**
@@ -94,7 +88,7 @@ void plate_charge_RC(struct data_job *plate_data, int position,
  * @param heat_data Puntero a la estructura `heat` donde se almacenarán los datos de calor cargados.
  */
 void plate_charge_heat(int position, struct data_array *dat,
-    struct heat **heat_data);
+    struct data_job *plate_data);
 
 /**
  * @brief Escribe los resultados en el archvio job y su respectivo plate.
@@ -105,8 +99,8 @@ void plate_charge_heat(int position, struct data_array *dat,
  * @param job Archivo al cual se le va a escribir la nueva informacion.
  * @param position Int para saber cual es la informacion del job correspondiente.
  */
-void jobs_out_file(struct data_array *dat, struct heat **heat_data,
-    struct data_job *plate_data, FILE *job, int position);
+void jobs_out_file(struct data_array *dat, struct data_job *plate_data,
+    FILE *job, int position);
 
 /**
  * @brief Escribe los resultados en el archvio job y su respectivo plate.

@@ -1,6 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
-#include <plate.h>
+#include "plate.h"
 
 void make_data(const char *filename, char job[]) {
   struct data_job *plate_data = calloc(sizeof(struct data_job), sizeof(double));

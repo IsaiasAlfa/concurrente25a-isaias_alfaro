@@ -1,6 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
-#include <plate.h>
+#include "plate.h"
 
 void make_data(const char *filename, char job[], uint64_t thread_count) {
   // memoria para las distintas estructuras
@@ -52,17 +52,10 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     plate_charge_RC(data_job, i, data_array);
     int rows = data_job->R;
     int cols = data_job->C;
-    // creacion de matriz
-    heat_t** heat = matrix(rows, cols);
-
-    if (heat == NULL) {
-      printf("Error al asignar memoria");
-      return;
-    }
-    // cargar matriz
-    shared_data->heat = heat;
+    // creacion de la estructura de datos
+    matrix(rows, cols, data_job);
     // cargar datos de calor
-    plate_charge_heat(i, data_array, heat);
+    plate_charge_heat(i, data_array, data_job);
     // guardar cantiad maxima de hilos que pidio el usuario
     shared_data->thread_count = threads_max;
 
@@ -74,9 +67,9 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     // equipo de hilos
     heat_team(shared_data);
     // escribir el resultado
-    jobs_out_file(data_array, heat, data_job, job_file, i);
+    jobs_out_file(data_array, data_job, job_file, i);
     // liberar la matriz
-    free_matrix(heat, rows);
+    free_matrix(data_job);
   }
   // cerrar los archivos
   jobs_close_file(job_file);
@@ -87,11 +80,12 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
 void heat_team(shared_data_t* shared_data) {
   // casteo de las estructuras para un manejo mas sencillo
   data_job_t* data_job = shared_data->data_job;
-  heat_t** heat = shared_data->heat;
+  double *current_warm = data_job->current_warm;
+  double *past_warm = data_job->past_warm;
 
   // creacion del equipo de hilos(array)
   pthread_t* threads = (pthread_t*)
-    malloc(shared_data->thread_count * sizeof(pthread_t));
+    calloc(shared_data->thread_count, sizeof(pthread_t));
 
   // memoria privada de cada hilo
   private_data_t* private_data = (private_data_t*)
@@ -137,14 +131,11 @@ void heat_team(shared_data_t* shared_data) {
 
     for (uint64_t i = 1; i < data_job->R - 1; i++) {
       for (uint64_t j = 1; j < data_job->C - 1; j++) {
-        // resta del calor para epsilon
-        rest_heat = heat[i][j].current_warm - heat[i][j].past_warm;
-
-        // Verificar si el sistema aún no está equilibrado
+        uint64_t idx = i * data_job->C + j;
         if (fabs(rest_heat) > data_job->epsilon) {
-          data_job->balance = 0;  // El sistema no está equilibrado, continuar
-        }
-          heat[i][j].past_warm = heat[i][j].current_warm;
+          data_job->balance = 0;
+          }
+        past_warm[idx] = current_warm[idx];
       }
     }
     // aumentar los ciclos
@@ -161,8 +152,9 @@ void* make_heat(void* data) {
   // casteo de las estructuras para un manejo mas sencillo
   private_data_t* private_data = (private_data_t*)data;
   shared_data_t* shared_data = private_data->shared_data;
-  heat_t** heat = shared_data->heat;
   data_job_t* data_job = shared_data->data_job;
+  double *current_warm = data_job->current_warm;
+  double *past_warm = data_job->past_warm;
 
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
@@ -188,14 +180,22 @@ void* make_heat(void* data) {
   if (end >= data_job->R) end = data_job->R - 1;
 
   // Iterar sobre las celdas de la matriz, excepto las fronteras
-  for (uint64_t i = start; i < end; i++) {
-    for (uint64_t j = 1; j < data_job->C - 1; j++) {
-      // Calcular el cambio en el calor
-      auxiliar = data_job->burn * (heat[i-1][j].past_warm +
-        heat[i][j-1].past_warm +
-        heat[i][j+1].past_warm +
-        heat[i+1][j].past_warm - (4 * heat[i][j].past_warm));
-        heat[i][j].current_warm = heat[i][j].current_warm + auxiliar;
+for (uint64_t i = 1; i < data_job->R - 1; i++) {
+        for (uint64_t j = 1; j < data_job->C - 1; j++) {
+            uint64_t idx = i * data_job->C + j;
+            uint64_t up = (i - 1) * data_job->C + j;
+            uint64_t down = (i + 1) * data_job->C + j;
+            uint64_t left = i * data_job->C + (j - 1);
+            uint64_t right = i * data_job->C + (j + 1);
+
+            auxiliar = data_job->burn * (
+                past_warm[up] +
+                past_warm[left] +
+                past_warm[right] +
+                past_warm[down] -
+                4 * past_warm[idx]);
+
+            current_warm[idx] = past_warm[idx] + auxiliar;
     }
   }
   return NULL;
@@ -209,33 +209,17 @@ void make_free(data_job_t* data_job, data_array_t* data_array,
   free(data_array);
 }
 
-heat_t** matrix(int filas, int columnas) {
-  // memoria para la estructura principal
-  heat_t** heat = calloc(filas, sizeof(heat_t*));
-  if (heat == NULL) {
-      perror("No se pudo asignar memoria para los punteros a las filas");
-      exit(EXIT_FAILURE);
-  }
-  for (int i = 0; i < filas; i++) {
-    // memoria para las columnas
-    heat[i] = malloc(columnas * sizeof(struct heat));
-    if (heat[i] == NULL) {
-        perror("No se pudo asignar memoria para una fila");
-        // Liberar memoria ya asignada
-        free_matrix(heat, i);
-        exit(EXIT_FAILURE);
-      }
-  }
-  return heat;
+void matrix(int filas, int columnas, data_job_t* data_job) {
+  // array
+  double* past_warm = calloc(filas*columnas, sizeof(double));
+  double* current_warm = calloc(filas*columnas, sizeof(double));
+  data_job->current_warm = current_warm;
+  data_job->past_warm = past_warm;
 }
 
-void free_matrix(heat_t** heat, int filas) {
-  // recorrer la matriz borrando las filas
-  for (int i = 0; i < filas; i++) {
-    free(heat[i]);
-}
-// liberar toda la estructura
-free(heat);
+void free_matrix(data_job_t* data_job) {
+  free(data_job->past_warm);
+  free(data_job->current_warm);
 }
 
 int analyze_arguments(char* filename, size_t filename_size, char* job,

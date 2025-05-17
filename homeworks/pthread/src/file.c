@@ -1,6 +1,6 @@
 // Copyright 2025 Isaias Alfaro Ugalde
 
-#include <file.h>
+#include "file.h"
 
 void jobs_find_file(const char *filename, struct data_array *dat,
     int *cont_array) {
@@ -72,7 +72,7 @@ void plate_charge_RC(struct data_job *plate_data, int position,
 }
 
 void plate_charge_heat(int position, struct data_array *dat,
-    struct heat **heat_data) {
+    struct data_job *plate_data) {
   double auxiliar = 0;
   char file_path[100];
   snprintf(file_path, sizeof(file_path), "tests/%s", dat[position].plate);
@@ -86,13 +86,12 @@ void plate_charge_heat(int position, struct data_array *dat,
   fread(&R, sizeof(uint64_t), 1, plate);  // Lee el número de filas
   fread(&C, sizeof(uint64_t), 1, plate);  // Lee el número de columnas
 
+  uint64_t move = R*C;
   // Itera sobre cada celda de la matriz para leer los datos de calor
-  for (uint64_t i = 0; i < R; i++) {
-    for (uint64_t j = 0; j < C; j++) {
-      fread(&auxiliar, sizeof(double), 1, plate);
-      heat_data[i][j].past_warm = auxiliar;
-      heat_data[i][j].current_warm = auxiliar;
-    }
+  for (uint64_t i = 0; i < move; i++) {
+    fread(&auxiliar, sizeof(double), 1, plate);
+    plate_data->current_warm[i] = auxiliar;
+    plate_data->past_warm[i] = auxiliar;
   }
   fclose(plate);  // Cierra el archivo
 }
@@ -113,7 +112,7 @@ void jobs_close_file(FILE *file) {
     fclose(file);  // Cierra el archivo
 }
 
-void jobs_out_file(struct data_array *dat, struct heat **heat_data,
+void jobs_out_file(struct data_array *dat,
     struct data_job *plate_data, FILE *job_out, int position) {
   char time_file[20];
   time_t seconds = (plate_data->time * plate_data->report);
@@ -134,12 +133,8 @@ void jobs_out_file(struct data_array *dat, struct heat **heat_data,
   FILE *file_plate = fopen(state_plate, "wb");
   fwrite(&plate_data->R, sizeof(uint64_t), 1, file_plate);
   fwrite(&plate_data->C, sizeof(uint64_t), 1, file_plate);
-  for (uint64_t i = 0; i < plate_data->R; i++) {
-    for (uint64_t j = 0; j < plate_data->C; j++) {
-      double auxiliar = heat_data[i][j].current_warm;
-      fwrite(&auxiliar, sizeof(double), 1, file_plate);
-    }
-  }
+  uint64_t move = plate_data->R * plate_data->C;
+  fwrite(plate_data->current_warm, sizeof(double), move, file_plate);
   fclose(file_plate);
 }
 

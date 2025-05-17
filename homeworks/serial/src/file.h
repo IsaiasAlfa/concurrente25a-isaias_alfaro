@@ -10,14 +10,6 @@
 #include <string.h>
 
 /**
-* @brief Estructura que representa las temperaturas actuales y pasadas en un punto de una placa.
-*/
-struct heat {
-  double past_warm;     // < Temperatura pasada del punto.
-  double current_warm;  // < Temperatura actual del punto.
-};
-
-/**
 * @brief Estructura que contiene los datos de la placa y parámetros para la simulación de calor.
 */
 struct data_job {
@@ -29,8 +21,8 @@ struct data_job {
   uint64_t C;         // < Número de columnas de la matriz de la placa.
   int balance;        // < Bool Indicador de equilibrio térmico.
   int report;         // < Contador de iteraciones o reportes en la simulación.
-  double* past_warm;
-  double* current_warm;
+  double* past_warm;  // < Array del calor pasado
+  double* current_warm;  // < Array del calor futuro
 };
 
 /**

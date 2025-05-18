@@ -18,9 +18,11 @@ image::./images/UML.svg[UML]
 
 ---
 
-== Estructura de datos
+* *Array*: Al simular una lámina, buscamos recrearla en un programa con cierta exactitud respecto a una lámina en la vida real. Para ello, se opto por utilizar un arreglo unidimensional que simula una mtriz. Esto se puede ver como si se juntaran todas las filas de la matriz en una sola fila.
 
-* *Matriz*: Al simular una lámina, buscamos recrearla en un programa con cierta exactitud respecto a una lámina en la vida real. Para ello, se optó por una matriz en la que inyectamos calor en los bordes durante la simulación, mientras que en las celdas interiores calculamos progresivamente la distribución del calor mediante una fórmula específica. 
+image::images/Memoria.svg[]
+
+Aqui vemos como un ejemplo de como se veria el array guardado en memoria. En este caso, la matriz es de 3x4, por lo que se tienen 12 campos y vemos como cada fila se va guardando de una forma seguida. 
 
 === Structs
 

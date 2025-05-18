@@ -85,7 +85,7 @@ void plate_charge_RC(struct data_job *plate_data, int position,
  *
  * @param position Posición en el array `data_array` de donde se cargarán los datos de calor.
  * @param dat Array de estructuras `data_array` desde donde se cargarán los datos.
- * @param heat_data Puntero a la estructura `heat` donde se almacenarán los datos de calor cargados.
+ * @param plate_data Puntero donde se guardan la infomracion para la simulacion.
  */
 void plate_charge_heat(int position, struct data_array *dat,
     struct data_job *plate_data);
@@ -94,7 +94,6 @@ void plate_charge_heat(int position, struct data_array *dat,
  * @brief Escribe los resultados en el archvio job y su respectivo plate.
  *
  * @param dat Array de estructuras `data_array` desde donde se cargarán los datos.
- * @param heat_data Puntero a la estructura `heat` donde se almacenarán los datos de calor cargados.
  * @param plate_data Esctructura con los datos del job y el plate.
  * @param job Archivo al cual se le va a escribir la nueva informacion.
  * @param position Int para saber cual es la informacion del job correspondiente.

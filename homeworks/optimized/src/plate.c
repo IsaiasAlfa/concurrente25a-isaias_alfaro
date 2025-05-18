@@ -64,6 +64,8 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     if (shared_data->thread_count > data_job->R) {
       shared_data->thread_count = data_job->R;
     }
+    heat_team(shared_data);
+    /*
     if (data_job->C > 500 && data_job->R > 500
       && shared_data->thread_count > 1) {
       // equipo de hilos
@@ -71,7 +73,7 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     } else {
       // un solo hilo
       heat_serial(data_job);
-    }
+    }*/
     // escribir el resultado
     jobs_out_file(data_array, data_job, job_file, i);
     // liberar la matriz
@@ -230,7 +232,7 @@ void* make_heat(void* data) {
 
     while (1) {
       sem_wait(&shared_data->mutex_work_available);
-        if (shared_data->work_available >= data_job->R - 1) {
+        if (shared_data->work_available >= data_job->R - 2) {
           // No hay más trabajo disponible
           sem_post(&shared_data->mutex_work_available);
           break;

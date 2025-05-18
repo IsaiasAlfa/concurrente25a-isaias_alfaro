@@ -114,8 +114,17 @@ if (data_job->C > 500 && data_job->R > 500
 [[optimization_comparison]]
 === Comparación de optimizaciones
 
-(pendiente)
+image::images/Duracion y Speedup.png[Duracion y Speedup]
 
+Se comenzó con un programa serial que tardaba 78.612 segundos en el caso de prueba. Posteriormente, se mejoró el rendimiento al reemplazar las matrices por arreglos lineales para simular las placas, lo que agilizó el acceso a los datos. Esta optimización redujo el tiempo de ejecución a 58.337 segundos.
+
+Luego se desarrolló una versión concurrente, que inicialmente resultó muy lenta debido a la creación y destrucción innecesaria de hilos en cada iteración. En una primera mejora, se reemplazó el uso de join por barreras de sincronización, lo que redujo el tiempo a 1250.020 segundos.
+
+Finalmente, se implementó una estrategia híbrida: se utiliza un solo hilo cuando las matrices son pequeñas y múltiples hilos solo cuando las matrices son grandes. Esto permitió aprovechar lo mejor de ambos enfoques, reduciendo el tiempo de ejecución a 56.060 segundos.
+
+image::images/Eficiencia y Speedup.png[Eficiencia y Speedup]
+
+Esta imagen vemos la eficiencia de cada una de las optimizaciones. En las versiones seriales la eficiencia es de 1. En las concurrentes van cambiando segun los hilos con los que se ejecuta el programa. En la version conc1 se ve que la eficiencia es de 0.13, esto es por que se usan muchos hilos y no se aprovechan al maximo. En la version conc2 la eficiencia es de 3.125, esto es por que se usan pocos hilos y se aprovechan al maximo.
 
 [[concurrency_comparison]]
 === Comparación del grado de concurrencia

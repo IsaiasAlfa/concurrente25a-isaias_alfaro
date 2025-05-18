@@ -69,6 +69,7 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
       // equipo de hilos
       heat_team(shared_data);
     } else {
+      // un solo hilo
       heat_serial(data_job);
     }
     // escribir el resultado
@@ -105,12 +106,13 @@ void heat_serial(data_job_t* data_job) {
     // Iterar sobre las celdas de la matriz, excepto las fronteras
     for (uint64_t i = 1; i < data_job->R - 1; i++) {
       for (uint64_t j = 1; j < data_job->C - 1; j++) {
-        uint64_t idx = i * data_job->C + j;
+        uint64_t idx = i * data_job->C + j;  // Índice de la celda actual
         uint64_t up = (i - 1) * data_job->C + j;
         uint64_t down = (i + 1) * data_job->C + j;
         uint64_t left = i * data_job->C + (j - 1);
         uint64_t right = i * data_job->C + (j + 1);
 
+        // Calcular la nueva temperatura utilizando el método de difusión
         auxiliar = burn * (
           past_warm[up] +
           past_warm[left] +
@@ -142,6 +144,7 @@ void heat_team(shared_data_t* shared_data) {
   // casteo de las estructuras para un manejo mas sencillo
   data_job_t* data_job = shared_data->data_job;
 
+  // inicializar valores de shared_data
   data_job->report = 0;
   shared_data->work_available = 0;
   shared_data->balance = 0;
@@ -155,6 +158,7 @@ void heat_team(shared_data_t* shared_data) {
   private_data_t* private_data = (private_data_t*)
     calloc(shared_data->thread_count, sizeof(private_data_t));
 
+  // inicializar los semaforos
   sem_init(&shared_data->mutex_work_available, 0, 1);
   sem_init(&shared_data->mutex_balance, 0, 1);
   sem_init(&shared_data->can_acces_count, 0, 1);
@@ -235,12 +239,14 @@ void* make_heat(void* data) {
       sem_post(&shared_data->mutex_work_available);
       // Iterar sobre las celdas de la matriz, excepto las fronteras
         for (uint64_t j = 1; j < data_job->C - 1; j++) {
+          // Calcular el índice de la celda actual
           uint64_t idx = work * data_job->C + j;
           uint64_t up = (work - 1) * data_job->C + j;
           uint64_t down = (work + 1) * data_job->C + j;
           uint64_t left = work * data_job->C + (j - 1);
           uint64_t right = work * data_job->C + (j + 1);
 
+          // Calcular la nueva temperatura utilizando el método de difusión
           auxiliar = data_job->burn * (
             data_job->past_warm[up] +
             data_job->past_warm[left] +
@@ -261,6 +267,7 @@ void* make_heat(void* data) {
       }
     }
 
+    // Intercambiar buffers
     sem_wait(&shared_data->can_acces_count2);
       shared_data->count2 = shared_data->count2 + 1;
       if (shared_data->count2 == shared_data->thread_count) {

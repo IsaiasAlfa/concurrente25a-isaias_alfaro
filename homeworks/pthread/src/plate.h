@@ -16,14 +16,14 @@
  * @brief Estructura que almacena los datos compartidos de los hilos.
  */
 typedef struct shared_data {
-    sem_t mutex_balance;
-    sem_t can_acces_count;
-    sem_t can_acces_count2;
-    sem_t barrier_exchange;
-    sem_t barrier_work;
-    uint64_t balance;
-    uint64_t count;
-    uint64_t count2;
+    sem_t mutex_balance;  // < Semaforo para el balance
+    sem_t can_acces_count;  // < Semaforo para el acceso a count
+    sem_t can_acces_count2;  // < Semaforo para el acceso a count2
+    sem_t barrier_exchange;  // < Semaforo para la barrera de intercambio
+    sem_t barrier_work;  // < Semaforo para la barrera de trabajo
+    uint64_t balance;  // < Variable para el balance
+    uint64_t count;  // < Contador de iteraciones
+    uint64_t count2;  // < Contador de iteraciones
     data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
     uint64_t thread_count;  // < Cantidad de hilos
 }shared_data_t;

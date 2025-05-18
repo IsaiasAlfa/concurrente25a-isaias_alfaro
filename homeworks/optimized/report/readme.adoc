@@ -61,8 +61,8 @@ void free_matrix(struct data_job *plate_data) {
 |===
 |Iter. |Etiqueta |Duración (s) |_Speedup_ |Eficiencia |Descripción corta
 |- |SerialI |58.537 |1.00 |1.00 |Versión serial final
-|1 |Conc0 |1387.699 | |1.00 |Versión concurrente inicial (Tarea02)
-|2 | | | | |
+|1 |Conc0 |1387.699 |1.00 |1.00 |Versión concurrente inicial (Tarea02)
+|2 |Conc1 |1250.020 |1.11 |0.13 |Uso de barreras en lugar de Join (Tarea02)
 |3 | | | | |Versión concurrente final
 |===
 
@@ -75,7 +75,27 @@ La tarea02 presenta un problema importante: la creación y destrucción repetida
 [[conc_iter01]]
 === Iteración 1
 
-#Para cada iteración del ciclo de optimización, cree una subsección como esta. Resuma en máximo un párrafo en qué consiste la optimización. Su objetivo es que quien lea este documento entienda claramente qué se intentó mejorar. Provea trocitos de código fuente o pseudocódigo que ayude a entender la optimización potencial. Indique si el intento logró incrementar el desempeño. En caso de no lograrlo, conjeture la causa. Eso ayudaría a ahorrar tiempo a otras personas que tengan la misma inquietud.#
+En esta iteración se implementó el uso de barreras en lugar de la función Join. Esta modificación permite que los hilos se sincronicen de manera más eficiente, evitando la necesidad de borrarlos y volverlos a crear cada que un ciclo de la simulación se completa. Al mantener los hilos activos durante toda la ejecución, se logra una mejora significativa en el rendimiento general del programa.
+
+[source, c]
+--
+sem_wait(&shared_data->can_acces_count);
+  shared_data->count = shared_data->count + 1;
+  if (shared_data->count == shared_data->thread_count) {
+    shared_data->balance = 1;
+    shared_data->count = 0;
+    for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
+      sem_post(&shared_data->barrier_work);
+      }
+  }
+sem_post(&shared_data->can_acces_count);
+sem_wait(&shared_data->barrier_work);
+--
+
+En este fraagmento de codigo se puede apreciar como se implemento una de las barreras que se usan durante el ciclo para sincornizar los hilos.
+
+[[conc_iter02]]
+=== Iteración 2
 
 
 [[optimization_comparison]]

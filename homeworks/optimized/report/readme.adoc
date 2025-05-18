@@ -63,7 +63,7 @@ void free_matrix(struct data_job *plate_data) {
 |- |SerialI |58.537 |1.00 |1.00 |Versión serial final
 |1 |Conc0 |1387.699 |1.00 |1.00 |Versión concurrente inicial (Tarea02)
 |2 |Conc1 |1250.020 |1.11 |0.13 |Uso de barreras en lugar de Join (Tarea02)
-|3 | | | | |Versión concurrente final
+|3 |Conc2 |56.060 |25.00 |3.125 |Versión concurrente final
 |===
 
 
@@ -97,6 +97,19 @@ En este fraagmento de codigo se puede apreciar como se implemento una de las bar
 [[conc_iter02]]
 === Iteración 2
 
+Esta optimizacion trata de mejorar un problema que tienen los hilos al ejecutar cantidades pequeñas de trabajo. Cuando la matriz es pequeña un solo hilo trabaja toda la matriz esto por que si son muchos se dura mas en todo el proceso de sincronizar los hilos que en el trabajo. Por lo cual es mejor que un solo hilo trabaje toda la matriz.
+
+[source, c]
+--
+if (data_job->C > 500 && data_job->R > 500
+  && shared_data->thread_count > 1) {
+  // equipo de hilos
+  heat_team(shared_data);
+} else {
+  // un solo hilo
+  heat_serial(data_job);
+}
+--
 
 [[optimization_comparison]]
 === Comparación de optimizaciones

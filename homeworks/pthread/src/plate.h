@@ -2,11 +2,12 @@
 #ifndef SRC_PLATE_H_
 #define SRC_PLATE_H_
 
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <pthread.h>
 #include <math.h>
-#include <sys/stat.h>
 
 #include "file.h"
 
@@ -17,6 +18,14 @@
  * @brief Estructura que almacena los datos compartidos de los hilos.
  */
 typedef struct shared_data {
+    sem_t mutex_balance;
+    sem_t can_acces_count;
+    sem_t can_acces_count2;
+    sem_t barrier_exchange;
+    sem_t barrier_work;
+    uint64_t balance;
+    uint64_t count;
+    uint64_t count2;
     data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
     uint64_t thread_count;  // < Cantidad de hilos
 }shared_data_t;

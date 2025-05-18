@@ -80,9 +80,8 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
 void heat_team(shared_data_t* shared_data) {
   // casteo de las estructuras para un manejo mas sencillo
   data_job_t* data_job = shared_data->data_job;
-  double *current_warm = data_job->current_warm;
-  double *past_warm = data_job->past_warm;
 
+  data_job->report = 0;
   // creacion del equipo de hilos(array)
   pthread_t* threads = (pthread_t*)
     calloc(shared_data->thread_count, sizeof(pthread_t));
@@ -91,12 +90,12 @@ void heat_team(shared_data_t* shared_data) {
   private_data_t* private_data = (private_data_t*)
     calloc(shared_data->thread_count, sizeof(private_data_t));
 
-  // ciclos que se va a ejecutar
-  double cycles = 0;
-  // resta para verificar el balance
-  double rest_heat = 0;
-  // variable que avisa si se llego al balance
-  data_job->balance = 0;  // Inicializamos balance a 0 (no equilibrado)
+  sem_init(&shared_data->mutex_balance, 0, 1);
+  sem_init(&shared_data->can_acces_count, 0, 1);
+  sem_init(&shared_data->can_acces_count2, 0, 1);
+  sem_init(&shared_data->barrier_exchange, 0, 0);
+  sem_init(&shared_data->barrier_work, 0, 0);
+
 
   // constante en la ejecucion de calor
   double burn = (data_job->time * data_job->material) /
@@ -108,44 +107,28 @@ void heat_team(shared_data_t* shared_data) {
     return;
   }
 
-  while (data_job->balance != 1) {
-    // suponer que se alcanzo el balance
-    data_job->balance = 1;
+  shared_data->balance = 0;
 
-    for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
-      ; ++thread_number) {
-      // asignacion de la memoria privada de cada hilo
-      private_data[thread_number].thread_number = thread_number;
-      private_data[thread_number].shared_data = shared_data;
+  for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
+    ; ++thread_number) {
+    // asignacion de la memoria privada de cada hilo
+    private_data[thread_number].thread_number = thread_number;
+    private_data[thread_number].shared_data = shared_data;
 
-      // creacion del equipo de hilos y guardarlos en el array de trabajo
-      pthread_create(&threads[thread_number], /*attr*/ NULL, make_heat
-        , /*arg*/ &private_data[thread_number]);
-    }
-
-    // esperar a que todos los hilos terminen de trabajar
-    for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
-      ; ++thread_number) {
-    pthread_join(threads[thread_number], /*value_ptr*/ NULL);
-    }
-
-    for (uint64_t i = 1; i < data_job->R - 1; i++) {
-      for (uint64_t j = 1; j < data_job->C - 1; j++) {
-        uint64_t idx = i * data_job->C + j;
-        if (fabs(rest_heat) > data_job->epsilon) {
-          data_job->balance = 0;
-          }
-        past_warm[idx] = current_warm[idx];
-      }
-    }
-    // aumentar los ciclos
-    cycles++;
+    // creacion del equipo de hilos y guardarlos en el array de trabajo
+    pthread_create(&threads[thread_number], /*attr*/ NULL, make_heat
+      , /*arg*/ &private_data[thread_number]);
   }
-  // guardar la cantidad de ciclos
-  data_job->report = cycles;
+
+  for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
+    ; ++thread_number) {
+    pthread_join(threads[thread_number], /*value_ptr*/ NULL);
+  }
   // liberar la memoriaque se utilizo para el equipo de hilos
-  free(threads);
+  sem_destroy(&shared_data->barrier_work);
+  sem_destroy(&shared_data->barrier_exchange);
   free(private_data);
+  free(threads);
 }
 
 void* make_heat(void* data) {
@@ -153,8 +136,6 @@ void* make_heat(void* data) {
   private_data_t* private_data = (private_data_t*)data;
   shared_data_t* shared_data = private_data->shared_data;
   data_job_t* data_job = shared_data->data_job;
-  double *current_warm = data_job->current_warm;
-  double *past_warm = data_job->past_warm;
 
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
@@ -180,23 +161,66 @@ void* make_heat(void* data) {
   if (end >= data_job->R) end = data_job->R - 1;
 
   // Iterar sobre las celdas de la matriz, excepto las fronteras
-for (uint64_t i = 1; i < data_job->R - 1; i++) {
-        for (uint64_t j = 1; j < data_job->C - 1; j++) {
-            uint64_t idx = i * data_job->C + j;
-            uint64_t up = (i - 1) * data_job->C + j;
-            uint64_t down = (i + 1) * data_job->C + j;
-            uint64_t left = i * data_job->C + (j - 1);
-            uint64_t right = i * data_job->C + (j + 1);
+  while (shared_data->balance != 1) {
+    sem_wait(&shared_data->can_acces_count);
+      shared_data->count = shared_data->count + 1;
+      if (shared_data->count == shared_data->thread_count) {
+        shared_data->balance = 1;
+        shared_data->count = 0;
+        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
+          sem_post(&shared_data->barrier_work);
+        }
+      }
+    sem_post(&shared_data->can_acces_count);
+    sem_wait(&shared_data->barrier_work);
 
-            auxiliar = data_job->burn * (
-                past_warm[up] +
-                past_warm[left] +
-                past_warm[right] +
-                past_warm[down] -
-                4 * past_warm[idx]);
+    // Iterar sobre las celdas de la matriz, excepto las fronteras
+    for (uint64_t i = start; i < end; i++) {
+      for (uint64_t j = 1; j < data_job->C - 1; j++) {
+        uint64_t idx = i * data_job->C + j;
+        uint64_t up = (i - 1) * data_job->C + j;
+        uint64_t down = (i + 1) * data_job->C + j;
+        uint64_t left = i * data_job->C + (j - 1);
+        uint64_t right = i * data_job->C + (j + 1);
 
-            current_warm[idx] = past_warm[idx] + auxiliar;
+        auxiliar = data_job->burn * (
+          data_job->past_warm[up] +
+          data_job->past_warm[left] +
+          data_job->past_warm[right] +
+          data_job->past_warm[down] -
+          4 * data_job->past_warm[idx]);
+
+        data_job->current_warm[idx] = data_job->past_warm[idx] + auxiliar;
+
+        double rest_heat = data_job->current_warm[idx]
+          - data_job->past_warm[idx];
+
+        if (fabs(rest_heat) > data_job->epsilon) {
+          sem_wait(&shared_data->mutex_balance);
+            if (shared_data->balance != 0) {
+              shared_data->balance = 0;
+            }
+          sem_post(&shared_data->mutex_balance);
+        }
+      }
     }
+
+    sem_wait(&shared_data->can_acces_count2);
+      shared_data->count2 = shared_data->count2 + 1;
+      if (shared_data->count2 == shared_data->thread_count) {
+        shared_data->count2 = 0;
+        // Intercambiar buffers
+        double *ptr_auxiliar = data_job->past_warm;
+        data_job->past_warm = data_job->current_warm;
+        data_job->current_warm = ptr_auxiliar;
+
+        data_job->report = data_job->report + 1;
+        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
+          sem_post(&shared_data->barrier_exchange);
+        }
+      }
+    sem_post(&shared_data->can_acces_count2);
+    sem_wait(&shared_data->barrier_exchange);
   }
   return NULL;
 }

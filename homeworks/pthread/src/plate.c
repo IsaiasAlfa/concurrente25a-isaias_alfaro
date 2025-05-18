@@ -64,8 +64,13 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
       shared_data->thread_count = data_job->R;
     }
 
-    // equipo de hilos
-    heat_team(shared_data);
+    if (data_job->C > 500 && data_job->R > 500
+      && shared_data->thread_count > 1) {
+      // equipo de hilos
+      heat_team(shared_data);
+    } else {
+      heat_serial(data_job);
+    }
     // escribir el resultado
     jobs_out_file(data_array, data_job, job_file, i);
     // liberar la matriz
@@ -76,6 +81,63 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
   // liberar la memoria
   make_free(data_job, data_array, shared_data);
 }
+
+void heat_serial(data_job_t* data_job) {
+  double cycles = 0;
+  double auxiliar = 0;
+  double rest_heat = 0;
+  data_job->balance = 0;  // Inicializamos balance a 0 (no equilibrado)
+
+  double *current_warm = data_job->current_warm;
+  double *past_warm = data_job->past_warm;
+
+  double burn = (data_job->time * data_job->material) /
+    (data_job->area * data_job->area);
+
+  if (data_job->R <= 1 || data_job->C <= 1) {
+    printf("Error: dimensiones de la matriz no válidas.\n");
+    return;
+  }
+
+  while (data_job->balance != 1) {
+    data_job->balance = 1;
+
+    // Iterar sobre las celdas de la matriz, excepto las fronteras
+    for (uint64_t i = 1; i < data_job->R - 1; i++) {
+      for (uint64_t j = 1; j < data_job->C - 1; j++) {
+        uint64_t idx = i * data_job->C + j;
+        uint64_t up = (i - 1) * data_job->C + j;
+        uint64_t down = (i + 1) * data_job->C + j;
+        uint64_t left = i * data_job->C + (j - 1);
+        uint64_t right = i * data_job->C + (j + 1);
+
+        auxiliar = burn * (
+          past_warm[up] +
+          past_warm[left] +
+          past_warm[right] +
+          past_warm[down] -
+          4 * past_warm[idx]);
+
+        current_warm[idx] = past_warm[idx] + auxiliar;
+
+        rest_heat = current_warm[idx] - past_warm[idx];
+
+        if (fabs(rest_heat) > data_job->epsilon) {
+          data_job->balance = 0;
+        }
+      }
+    }
+
+    // Intercambiar buffers
+    double *ptr_auxiliar = past_warm;
+    past_warm = current_warm;
+    current_warm = ptr_auxiliar;
+
+    cycles++;  // Incrementar el contador de ciclos
+  }
+  data_job->report = cycles;
+}
+
 
 void heat_team(shared_data_t* shared_data) {
   // casteo de las estructuras para un manejo mas sencillo

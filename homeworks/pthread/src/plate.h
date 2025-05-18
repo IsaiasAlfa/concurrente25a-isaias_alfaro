@@ -11,8 +11,6 @@
 
 #include "file.h"
 
-
-
 /**
  * @struct shared_data
  * @brief Estructura que almacena los datos compartidos de los hilos.
@@ -66,6 +64,13 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
  */
 void make_matrix(shared_data_t* shared_data, data_array_t *dat,
     int *cont_array, char job[]);
+
+/**
+ * @brief Metodo que se llama cuando la matriz es muy pequeña y es mejor trabajar con un solo hilo.
+ * 
+ * @param data_job Struct con la informacion necesaria para la simulacion.
+ */
+void heat_serial(data_job_t* data_job);
 
 /**
  * @brief Metodo de creacion de equipos para la simulacion.

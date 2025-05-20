@@ -1,6 +1,7 @@
 // Copyright 2024 ECCI-UCR CC-BY 4.0
 #pragma once
 
+#include <omp.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
@@ -28,14 +29,39 @@ Type maximum(const std::vector<Type>& values) {
   return result;
 }
 
+
 template <typename Type>
 Type sum(const std::vector<Type>& values) {
   Type result = Type();
+  #pragma omp parallel for schedule(static) reduction(+:result) \
+    default(none) shared(values)
   for (size_t index = 0; index < values.size(); ++index) {
     result += values[index];
   }
   return result;
 }
+
+//  Forma paralela convencional, modifica el codigo fuente, lo cual es malo
+//  No se busca modificar el dcodigo, para que sirva aunque OMP no este activo
+/*
+template <typename Type>
+Type sum(const std::vector<Type>& values) {
+  Type result = Type();
+  #pragma omp parallel default(none) shared(values, result)
+  {
+    Type my_private_sum = {};
+    #pragma omp for schedule(static)
+    for (size_t index = 0; index < values.size(); ++index) {
+      my_private_sum += values[index];
+    }
+
+
+  //  #pragma omp critical(can_sum)
+  #pragma omp atomic
+    result += my_private_sum;
+  }
+  return result;
+}*/
 
 template <typename Type>
 double average(const std::vector<Type>& values) {

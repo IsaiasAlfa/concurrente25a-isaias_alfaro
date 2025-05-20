@@ -1,6 +1,6 @@
 include ../../common/Makefile
 
-#FLAG += -fopenmp
+FLAG += -fopenmp
 LIBS += -lm
 
 MIN=10000000

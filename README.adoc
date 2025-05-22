@@ -28,7 +28,7 @@
 |13 |link:ejemplos/pthreads/position_race[position_race] |Ejemplo comentado| Programa que simula una carrera de hilos con un mutex para la impresion.
 |14 |link:ejemplos/pthreads/birthday_pinata[birthday_pinata] |Extraclase |Programa que simula como unos hilos se turnan con un mutex para romper una piñata.
 |15 |link:ejemplos/pthreads/prod_cons_bound[prod_cons_bound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con dos hilos y controlados con semaforos.
-|15 |link:ejemplos/pthreads/prod_cons_unbound[prod_cons_unbound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con una cola no acotada.
+|16 |link:ejemplos/pthreads/prod_cons_unbound[prod_cons_unbound] |Ejemplo comentado |Programa que simula una linea de productor/consumidor con una cola no acotada.
 |===
 
 == tasks
@@ -42,6 +42,17 @@
 |5 |link:taskc/network_simul_bounded[bounded] |Ejemplo de clase | Programa packet_loss que acota la cola de cada consumidor.
 |===
 
+== omp
+
+[%autowidth]
+|===
+|1 |link:omp/omp_team[omp_team] |Ejemplo de clase | Programa que usa omp para crear un equipo de hilos e imprimir en la terminal un saludo.
+|2 |link:omp/omp_for[omp_for] |Ejemplo de clase | Pograma que usa omp para crear y distribuir un equipo de hilos en un for
+|3 |link:omp/omp_several_for_stages[omp_several_for_stages] |Ejemplo de clase | Equipo de hilos usando omp que se distribuye por muchos for
+|4 |link:omp/omp_stats[omp_stats] |Ejemplo de clase | Programa que hace caluclos de probabilidade usando omp y viendo las duraciones de esta tecnologia.
+|5 |link:omp/omp_mergesort[omp_mergesort] |Ejemplo de clase |
+|===
+
 == Tareas
 
 [%autowidth]
@@ -49,6 +60,7 @@
 |# |ID |Descripcion 
 |1 |link:homeworks/serial[serial_heat_transfer] | Tarea serial que simula la transferencia de calor en una lamina de un material en específico.
 |2 |link:homeworks/pthread[concurrent_heat_transfer] | Tarea concurrente que simula la transferencia de calor en una lamina de un material en específico.
+|3 |link:homeworks/optimized[heat_transfer] | Tarea optimizada que simula la transferencia de calor en una lamina de un material en específico.
 |===
 
 == Glosario
@@ -163,6 +175,8 @@ Es un entero que permite controlar a los hilos, genera wait hasta que el semafor
 
 *15.Barrera.* 
 
+Es un semaforo que espera a que todos los hilos lleguen a un punto especifico para continuar.
+
 ** Ejemplo
 * Aguja que espera a que llegue una cantidad especifica de carros para dejarlos continuar, lo que genera que todos los carros avancen juntos al levantar la barrera
 
@@ -172,11 +186,38 @@ Es un entero que permite controlar a los hilos, genera wait hasta que el semafor
 
 *18.Descomposición.*
 
+La descomposición es la forma en que se identifican las tareas que se pueden realizar de forma independiente. Por lo tanto se pueden ejecutar de una forma paralela. Exiasten dos partes importantes la `granularidad` que es la cantiadad en la que se puede descomponer las tareas y la `dedscomposición` que es en que unidad se puede descomponer.
+
+** Ejemplo
+* En una empresa se pueden identificar las tareas que se pueden realizar de forma independiente, como la contabilidad, recursos humanos y la informática. Cada una de estas tareas puede ser realizada por un grupo diferente de personas, lo que permite que todas las tareas se realicen al mismo tiempo.
+
 *19.Mapeo.*
+
+El mapeo es la forma en la que se distribuyen los hilos en los procesadores, esto puede ser de forma estática o dinámica.
+
+** Estatico:
+* Es un mapeo que se conoce de ante mano, es solo conocer el numero de hilos y la cantiadd de trabajo, no cambia durante la ejecución.
+
+* Mapeo ciclico y por bloque son ejemplos de mapeo estatico.
+
+** Dinamico:
+* Es un mapeo que se va modificando durante la ejecución. Se van asiganando segun la carga de trabajo sin tomar en cuenta el orden de llegada.
+
+* El patron productor consumidor es un ejemplo de mapeo dinamico.
 
 *20.Incremento de velocidad (speedup).*
 
+El incremento de velocidad es la mejora en el tiempo de ejecución de un programa al utilizar múltiples hilos en lugar de uno solo. Se mide como la relación entre el tiempo de ejcución del programa antes de la optimización y el tiempo de ejecución del programa después de la optimización.
+
+** Ejemplo
+* Un programa que tarda 10 segundos en ejecutarse de forma serial, al utilizar múltiples hilos tarda 5 segundos en ejecutarse. El incremento de velocidad es de 2.
+
 *21.Eficiencia.*
+
+La eficiencia es la relación entre el incremento de velocidad y el número de hilos utilizados. Se mide como la relación entre el incremento de velocidad y el número de hilos utilizados. Así tambien se ve si se utilizaron muchos recursos para el trrabajo.
+
+**Ejemplo
+* Un programa que tarda 10 segundos en ejecutarse de forma serial, al utilizar 4 hilos tarda 5 segundos en ejecutarse. El incremento de velocidad es de 2 y la eficiencia es de 0.5.
 
 *22.Comunicación punto a punto entre procesos.*
 

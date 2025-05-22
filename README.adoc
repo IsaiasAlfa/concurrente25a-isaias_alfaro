@@ -186,7 +186,7 @@ Es un semaforo que espera a que todos los hilos lleguen a un punto especifico pa
 
 *18.Descomposición.*
 
-La descomposición es la forma en que se identifican las tareas que se pueden realizar de forma independiente. Por lo tanto se pueden ejecutar de una forma paralela. Exiasten dos partes importantes la `granularidad` que es la cantiadad en la que se puede descomponer las tareas y la `dedscomposición` que es en que unidad se puede descomponer.
+La descomposición es la forma en que se identifican las tareas que se pueden realizar de forma independiente. Por lo tanto se pueden ejecutar de una forma paralela. Exiasten dos partes importantes la `granularidad` que es la cantiadad en la que se puede descomponer las tareas y la `descomposición` que es en que unidad se puede descomponer.
 
 ** Ejemplo
 * En una empresa se pueden identificar las tareas que se pueden realizar de forma independiente, como la contabilidad, recursos humanos y la informática. Cada una de estas tareas puede ser realizada por un grupo diferente de personas, lo que permite que todas las tareas se realicen al mismo tiempo.

@@ -30,7 +30,9 @@ Dentro de una región paralela, algunos o todos los hilos pueden crear tareas si
 Use one of the following:
 
 - Run `make` to build an executable for debugging.
+// modo debug lo que hace que se ejeute el assert
 - Run `make release` to build an optimized executable.
+// modo que no ejecuta el assert
 
 [[usage]]
 === Usage

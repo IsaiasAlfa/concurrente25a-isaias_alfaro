@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
   }
 
   // TODO(you): parallelize using number of threads given by argv[2]
-  mergesort(values);
+  mergesort(values, thread_count);
   // Print sorted values, unless verbose mode is disabled
   if (verbose) {
     std::cout << values << std::endl;

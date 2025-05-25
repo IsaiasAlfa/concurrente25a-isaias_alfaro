@@ -1,6 +1,7 @@
 include ../../common/Makefile
 
 FLAG += -fopenmp
+INCLUDE += -I../omp_mergesort/src
 LIBS += -lm
 
 MIN=10000000

@@ -1,15 +1,18 @@
 // Copyright 2024 ECCI-UCR CC-BY 4.0
 #pragma once
 
-#include <omp.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
 #include <vector>
 
+#include "mergesort.hpp"
+
 template <typename Type>
 Type minimum(const std::vector<Type>& values) {
   Type result = std::numeric_limits<Type>::max();
+  #pragma omp parallel for schedule(static) reduction(min:result) \
+    default(none) shared(values)
   for (size_t index = 0; index < values.size(); ++index) {
     if (values[index] < result) {
       result = values[index];
@@ -21,6 +24,8 @@ Type minimum(const std::vector<Type>& values) {
 template <typename Type>
 Type maximum(const std::vector<Type>& values) {
   Type result = std::numeric_limits<Type>::min();
+  #pragma omp parallel for schedule(static) reduction(max:result) \
+    default(none) shared(values)
   for (size_t index = 0; index < values.size(); ++index) {
     if (values[index] > result) {
       result = values[index];
@@ -29,6 +34,23 @@ Type maximum(const std::vector<Type>& values) {
   return result;
 }
 
+// template <typename Type>
+// Type sum(const std::vector<Type>& values) {
+//   Type result = Type();
+//   #pragma omp parallel default(none) shared(values, result)
+//   {
+//     Type my_private_sum = {};
+//     #pragma omp for schedule(static)
+//     for (size_t index = 0; index < values.size(); ++index) {
+//       my_private_sum += values[index];
+//     }
+
+//     // #pragma omp critical(can_access_result)
+//     #pragma omp atomic
+//     result += my_private_sum;
+//   }
+//   return result;
+// }
 
 template <typename Type>
 Type sum(const std::vector<Type>& values) {
@@ -40,28 +62,6 @@ Type sum(const std::vector<Type>& values) {
   }
   return result;
 }
-
-//  Forma paralela convencional, modifica el codigo fuente, lo cual es malo
-//  No se busca modificar el dcodigo, para que sirva aunque OMP no este activo
-/*
-template <typename Type>
-Type sum(const std::vector<Type>& values) {
-  Type result = Type();
-  #pragma omp parallel default(none) shared(values, result)
-  {
-    Type my_private_sum = {};
-    #pragma omp for schedule(static)
-    for (size_t index = 0; index < values.size(); ++index) {
-      my_private_sum += values[index];
-    }
-
-
-  //  #pragma omp critical(can_sum)
-  #pragma omp atomic
-    result += my_private_sum;
-  }
-  return result;
-}*/
 
 template <typename Type>
 double average(const std::vector<Type>& values) {
@@ -78,6 +78,8 @@ double std_dev(const std::vector<Type>& values) {
   if (values.size() >= 2) {
     const double avg = average(values);
     double square_sum = 0.0;
+    #pragma omp parallel for schedule(static) reduction(+:square_sum) \
+      default(none) shared(values, avg)
     for (size_t index = 0; index < values.size(); ++index) {
       square_sum += square(values[index] - avg);
     }
@@ -90,7 +92,8 @@ template <typename Type>
 double median(std::vector<Type>& values) {
   const size_t count = values.size();
   if (count > 0) {
-    std::sort(values.begin(), values.end());
+    // std::sort(values.begin(), values.end());
+    ::mergesort(values);
     if (count % 2) {
       return values[count / 2];
     } else {

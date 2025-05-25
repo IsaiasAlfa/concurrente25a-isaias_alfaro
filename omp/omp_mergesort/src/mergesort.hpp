@@ -1,4 +1,6 @@
 // Copyright 2023 Jeisson Hidalgo jeisson.hidalgo@ucr.ac.cr CC-BY-4
+#include <omp.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -15,14 +17,14 @@ void mergesort(std::vector<Type>& values, const ptrdiff_t left,
     // task genera las tareas en una cola
     // #pragma omp taskgroup
     // {
-      #pragma omp task untied if(mid - left >= 5000) \
+      #pragma omp task untied if (mid - left >= 5000) \
         default(none)shared(values) firstprivate(left, mid)
       mergesort(values, left, mid);
       // Sort right half of the array
-      #pragma omp task untied if(right - left >= 5000) \
+      #pragma omp task untied if (right - left >= 5000) \
         default(none) shared(values) firstprivate(mid, right)
       mergesort(values, mid + 1, right);
-      // Wait util both sub_vectores are sorted 
+      // Wait util both sub_vectores are sorted
       // Wait for the task that are necesary for him
       #pragma omp taskwait
       // #pragma omp taskyield
@@ -41,7 +43,7 @@ void mergesort(std::vector<Type>& values, const ptrdiff_t left,
 }
 
 template <typename Type>
-void mergesort(std::vector<Type>& values, 
+void mergesort(std::vector<Type>& values,
     int thread_count = omp_get_max_threads()) {
   #pragma omp parallel num_threads(thread_count) default(none) shared(values)
   #pragma omp single

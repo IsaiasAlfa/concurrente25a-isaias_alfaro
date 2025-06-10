@@ -18,23 +18,39 @@ int main(int argc, char* argv[]) {
       const int overall_start = atoi(argv[1]);
       const int overall_finish = atoi(argv[2]);
 
-      const int process_start = calculate_start(process_number, overall_finish
-        , process_count, overall_start);
-      const int process_finish = calculate_finish(process_number, overall_finish
-        , process_count, overall_start);
+      const int process_start = calculate_start(mpi.rank(), overall_finish
+        , mpi.size(), overall_start);
+      const int process_finish = calculate_finish(mpi.rank(), overall_finish
+        , mpi.size(), overall_start);
       const int process_size = process_finish - process_start;
 
       std::cout << mpi.getHostname() << ':' << mpi.getProcessNumber()
           << ": range [" << process_start << ", " << process_finish
           << "[ size " << process_size << std::endl;
 
-      int thread_start = -1;
-      int thread_finish = -1;
-      const int thread_size = thread_finish - thread_start;
+      #pragma omp parallel default(none) \
+        shared(process_start, process_finish, std::cout, mpi)
+      {  // NOLINT()
+        int thread_start = -1;
+        int thread_finish = -1;
 
-      std::cout << '\t' << mpi.getHostname() << ':' << mpi.getProcessNumber()
-          << '.' << omp_get_thread_num() << ": range [" << thread_start << ", "
-          << thread_finish << "[ size " << thread_size << std::endl;
+
+        #pragma omp for
+        for (int index = process_start; index < process_finish; ++index) {
+          // do_task(index);
+          if (thread_start == -1) {
+            thread_start = index;
+          }
+          thread_finish = index + 1;
+        }
+
+        const int thread_size = thread_finish - thread_start;
+
+        #pragma omp critical(print)
+        std::cout << '\t' << mpi.getHostname() << ':' << mpi.getProcessNumber()
+            << '.' << omp_get_thread_num() << ": range [" << thread_start << ", "
+            << thread_finish << "[ size " << thread_size << std::endl;
+      }
     } else {
       std::cerr << "usage: hybrid_distr_arg start finish" << std::endl;
     }
@@ -45,7 +61,8 @@ int main(int argc, char* argv[]) {
 }
 
 int calculate_start(int rank, int end, int workers, int begin) {
-  // ...
+  const int range = end - begin;
+  return begin + rank * (rank / workers) + std::min(rank, range % workers);
 }
 
 int calculate_finish(int rank, int end, int workers, int begin) {

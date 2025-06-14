@@ -48,7 +48,6 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
   uint64_t threads_max = shared_data->thread_count;
   // for para todas las veces que se ocupan hacer distintas simulaciones
   for (int i = 0; i < position; i++) {
-    printf("Simulacion %d\n", i);
     // cargar datos inciales
     plate_charge_RC(data_job, i, data_array);
     int rows = data_job->R;

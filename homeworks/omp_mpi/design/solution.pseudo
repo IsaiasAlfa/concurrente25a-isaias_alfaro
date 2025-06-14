@@ -1,0 +1,6 @@
+procedure main()
+arguments_analysis()
+if arguments_analysis is god then
+    make_data()
+end if
+end procedure

@@ -1,0 +1,71 @@
+procedure make_data(filename)
+    // Buscar y cargar datos desde el archivo
+    jobs_find_file(filename, dat, cont_array)
+
+    // Crear matrices y procesar datos
+    make_matrix(plate_data, dat, cont_array)
+
+    // Liberar recursos
+    make_free(plate_data, dat)
+end procedure
+
+procedure make_matrix(plate_data, dat, cont_array)
+    for to max_entrys do
+        // Cargar datos de la placa
+        plate_charge_RC(plate_data, i, dat)
+
+        // Cargar datos de calor
+        plate_charge_heat(i, dat, heat_data)
+
+        // Creacion del equipo de hilos
+        heat_team(shared_data)
+
+    end for
+end procedure
+
+procedure shared_data(shared_data)
+
+// ver si se alcanzo el balance
+while (!balance)
+    // creacion de equipos
+    mutable teams := Create_threads(team_count, make_heat)
+    // esperar por que termine el trabajo
+    join_thread(teams)
+
+    // ver si se alcanzo el balance y actualizar la matriz
+    for i := 1 to plate_data->R - 1 do
+        for j ;= 1 to plate_data->C - 1 do
+            if rest_heat < epsilon do
+                balance := true;
+            end if
+            update_heat
+        end for
+    end for
+end procedure
+
+procedure make_heat(plate_data, heat_data)
+// cantidad de filas de cada hilo
+rows_max = rows / thread_count
+// inicio de cada hilo
+star = thread_number * rows_max
+// fin de cada hilo
+fin = thread_number + 1 * rows_max
+    // trabajo de simmulacion de cada hilo
+    for i := star to fin do
+        for j := 1 hasta plate_data->C - 1 do
+            // Calcular la nueva temperatura
+            auxiliar <- burn * (heat_data[mov - 1].past_warm +
+                heat_data[mov - plate_data->C].past_warm +
+                heat_data[mov + 1].past_warm +
+                heat_data[mov + plate_data->C].past_warm -
+                4 * heat_data[mov].past_warm)
+        end for
+    end for
+end procedure
+
+procedure analyze_arguments(filename, thread_count)
+    // se guarda el primer argumento
+    filename := integer(argv[1])
+    // se guarda el segundo argumento 
+    shared thread_count := integer(argv[2])
+end procedure

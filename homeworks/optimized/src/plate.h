@@ -26,6 +26,7 @@ typedef struct shared_data {
     uint64_t balance;  // < Variable para el balance
     uint64_t count;  // < Contador de iteraciones
     uint64_t count2;  // < Contador de iteraciones
+    double* balance_ar;  // < Array para el balance de calor
     data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
     uint64_t thread_count;  // < Cantidad de hilos
 }shared_data_t;

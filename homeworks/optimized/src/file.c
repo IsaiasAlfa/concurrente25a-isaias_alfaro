@@ -97,6 +97,8 @@ void plate_charge_heat(int position, struct data_array *dat,
 }
 
 void print_data_array(const struct data_array *dat, int size) {
+  // Imprime los datos del array de estructuras `data_array`
+  // Para comprobar el contenido de los datos cargados
   for (int i = 0; i < size; i++) {
     printf("Entry %d:\n", i);
     printf("  Plate: %s\n", dat[i].plate);
@@ -116,6 +118,7 @@ void jobs_out_file(struct data_array *dat,
     struct data_job *plate_data, FILE *job_out, int position) {
   char time_file[20];
   time_t seconds = (plate_data->time * plate_data->report);
+  // Guardar los datos en el archivo de salida
   if (format_time(seconds, time_file, 20) != NULL) {
     fprintf(job_out, "%s\t", dat[position].plate);
     fprintf(job_out, "%g\t", plate_data->time);
@@ -131,6 +134,7 @@ void jobs_out_file(struct data_array *dat,
   snprintf(state_plate, sizeof(state_plate), "out/%.*s-%d%s",
       (int)base_length, dat[position].plate, plate_data->report, dot_position);
   FILE *file_plate = fopen(state_plate, "wb");
+  // Guardar los datos de la placa en un archivo binario
   fwrite(&plate_data->R, sizeof(uint64_t), 1, file_plate);
   fwrite(&plate_data->C, sizeof(uint64_t), 1, file_plate);
   uint64_t move = plate_data->R * plate_data->C;

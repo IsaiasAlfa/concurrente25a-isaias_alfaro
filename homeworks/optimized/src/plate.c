@@ -64,6 +64,11 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     if (shared_data->thread_count > data_job->R) {
       shared_data->thread_count = data_job->R;
     }
+    double* balance_ar = calloc(shared_data->thread_count, sizeof(double));
+    shared_data->balance_ar = balance_ar;
+    for (uint64_t j = 0; j < shared_data->thread_count; j++) {
+      shared_data->balance_ar[j] = 1;
+    }
     heat_team(shared_data);
     /*
     if (data_job->C > 500 && data_job->R > 500
@@ -221,7 +226,7 @@ void* make_heat(void* data) {
       shared_data->count = shared_data->count + 1;
       if (shared_data->count == shared_data->thread_count) {
         shared_data->balance = 1;
-        shared_data->work_available = 0;
+        shared_data->work_available = 1;
         shared_data->count = 0;
         for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
           sem_post(&shared_data->barrier_work);
@@ -232,7 +237,7 @@ void* make_heat(void* data) {
 
     while (1) {
       sem_wait(&shared_data->mutex_work_available);
-        if (shared_data->work_available >= data_job->R - 2) {
+        if (shared_data->work_available >= data_job->R - 1) {
           // No hay más trabajo disponible
           sem_post(&shared_data->mutex_work_available);
           break;
@@ -262,9 +267,7 @@ void* make_heat(void* data) {
             - data_job->past_warm[idx];
 
           if (fabs(rest_heat) > data_job->epsilon) {
-            sem_wait(&shared_data->mutex_balance);
-                shared_data->balance = 0;
-            sem_post(&shared_data->mutex_balance);
+            shared_data->balance_ar[private_data->thread_number] = 0;
         }
       }
     }
@@ -281,6 +284,13 @@ void* make_heat(void* data) {
 
         data_job->report = data_job->report + 1;
         for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
+          if (shared_data->balance_ar[i] == 0) {
+            shared_data->balance = 0;
+            shared_data->balance_ar[i] = 1;
+            break;
+          }
+        }
+        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
           sem_post(&shared_data->barrier_exchange);
         }
       }
@@ -293,6 +303,7 @@ void* make_heat(void* data) {
 void make_free(data_job_t* data_job, data_array_t* data_array,
   shared_data_t* shared_data) {
   // liberar la memoria de los estructs principales
+  free(shared_data->balance_ar);
   free(shared_data);
   free(data_job);
   free(data_array);
@@ -307,6 +318,7 @@ void matrix(int filas, int columnas, data_job_t* data_job) {
 }
 
 void free_matrix(data_job_t* data_job) {
+  // liberar la memoria de los arrays
   free(data_job->past_warm);
   free(data_job->current_warm);
 }

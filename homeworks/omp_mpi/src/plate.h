@@ -2,12 +2,10 @@
 #ifndef SRC_PLATE_H_
 #define SRC_PLATE_H_
 
-#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <omp.h>
-#include <pthread.h>
 #include <math.h>
 
 #include "file.h"

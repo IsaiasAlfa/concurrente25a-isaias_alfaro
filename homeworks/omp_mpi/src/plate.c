@@ -156,25 +156,6 @@ void make_heat(data_job_t* data_job, uint64_t thread_count) {
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
 
-  // numero propio de hilo y cantidad totales de hilos
-  size_t thread_number = omp_get_thread_num();
-
-  // filas que le tocan a cada hilo
-  uint64_t rows_per_thread = data_job->R / thread_count;
-  // filas sobrantes por si no es divisible exacto
-  uint64_t remainder = data_job->R % thread_count;
-
-  // inicio de cada hilo en la matriz
-  uint64_t start = thread_number * rows_per_thread +
-    (thread_number < remainder ? thread_number : remainder);
-  // fin de cada hilo en la matriz
-  uint64_t end = start + rows_per_thread + (thread_number < remainder ? 1 : 0);
-
-  // caso especial primer hilo
-  if (start == 0) start = 1;
-  // caso especial ultimo hilo
-  if (end >= data_job->R) end = data_job->R - 1;
-
   // Iterar sobre las celdas de la matriz, excepto las fronteras
   while (data_job->balance != 1) {
     #pragma omp barrier
@@ -183,7 +164,8 @@ void make_heat(data_job_t* data_job, uint64_t thread_count) {
       data_job->balance = 1;
     }
     // Iterar sobre las celdas de la matriz, excepto las fronteras
-    for (uint64_t i = start; i < end; i++) {
+    #pragma omp for schedule(runtime)
+    for (uint64_t i = 1; i < data_job->R - 1; i++) {
       for (uint64_t j = 1; j < data_job->C - 1; j++) {
         uint64_t idx = i * data_job->C + j;
         uint64_t up = (i - 1) * data_job->C + j;

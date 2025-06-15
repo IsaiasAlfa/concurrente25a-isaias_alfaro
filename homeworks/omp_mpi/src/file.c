@@ -143,7 +143,7 @@ void jobs_out_file(struct data_array *dat,
 }
 
 char* format_time(const time_t seconds, char* text, const size_t capacity) {
-  const struct tm* gmt = gmtime(&seconds);
+  const struct tm* gmt = gmtime(&seconds);  // NOLINT(runtime/threadsafe_fn)
   snprintf(text, capacity, "%04d/%02d/%02d\t%02d:%02d:%02d", gmt->tm_year - 70,
     gmt->tm_mon, gmt->tm_mday - 1, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
   return text;

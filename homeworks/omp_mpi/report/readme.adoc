@@ -62,8 +62,9 @@ void free_matrix(struct data_job *plate_data) {
 |- |SerialI |58.537 |1.00 |1.00 |Versión serial final
 |1 |Conc0 |1387.699 |1.00 |1.00 |Versión concurrente inicial (Tarea02)
 |2 |Conc1 |1250.020 |1.11 |0.13 |Uso de barreras en lugar de Join (Tarea02)
-|3 |Conc3 |1193.030 |1.04 |0.13 |Version concurrente con mapeo dinamico en tiempo de ejecucion(Tarea03)
-|3 |Conc4 |56.060 |25.00 |3.125 |Versión concurrente final
+|3 |Conc2 |1193.030 |1.04 |0.13 |Version concurrente con mapeo dinamico en tiempo de ejecucion(Tarea03)
+|4 |Conc3 |56.060 |25.00 |3.125 |Versión concurrente final(Tarea03)
+|5 |Conc4 |898.740 |1.54 |1.193 |Version concurrente usando OpenMP (Tarea04)
 |===
 
 
@@ -127,6 +128,26 @@ work = shared_data->work_available++;
 sem_post(&shared_data->mutex_work_available);
 --
 
+=== Iteración 4
+En esta iteración se implementó la version del programa utilizando OpenMP. Esta versión aprovecha las capacidades de paralelización de OpenMP para mejorar el rendimiento del programa. Al utilizar directivas de OpenMP, se logra una distribución más eficiente de las tareas entre los hilos, lo que resulta en una reducción significativa del tiempo de ejecución.
+
+[source, c]
+--
+#pragma omp parallel for
+for (u_int64_t i = 0; i < data_job->R - 1; i++) {
+  for (u_int64_t j = 0; j < data_job->C - 1; j++) {
+    // Cálculo de la temperatura
+    data_job->current_warm[i * data_job->C + j] =
+      (data_job->past_warm[(i - 1) * data_job->C + j] +
+       data_job->past_warm[(i + 1) * data_job->C + j] +
+       data_job->past_warm[i * data_job->C + (j - 1)] +
+       data_job->past_warm[i * data_job->C + (j + 1)]) / 4.0;
+  }
+}
+--
+
+Podemos ver una gran mejora en el rendimiento al usar OpenMP, contra implementar ñuestra propia version de concurrencia. Esto es por que OpenMP esta optimizado para trabajar con hilos y tiene una gran cantidad de optimizaciones que nosotros no tenemos. Por lo cual es mejor usar OpenMP para este tipo de problemas.
+
 [[optimization_comparison]]
 == Comparación de optimizaciones
 
@@ -159,6 +180,7 @@ En esta seccion se va a tratar de responder una pregunta ciencitfica ¿afecta el
 |5 |2 CPU |Dos hilos por cada CPU que hay en la computadora que ejecuta el programa |16 |1411.425 |0.041 |0.00256
 |6 |4 CPU |Cuatro hilos por cada CPU que hay en la computadora que ejecuta el programa |32 |1865.524 |0.031 |0.00968
 |7 |Descomposición |Cantidad de filas |9 |1396 |0.041 |0.00456
+|7 |OpenMP |Versión concurrente usando OpenMP |8 |898.740 |0.065 |0.00812
 |===
 
 image::images/Eficiencia y SpeedUp Comparacion.png[SpeedUp y Eficiencia]
@@ -168,3 +190,30 @@ En esta sección se presentan los resultados de las pruebas realizadas para eval
 Podemos observar como nuestro programa logra un mejor uso del tiempo con un solo hilo al ser muy pequeña la matriz. Por lo cual nuestro control de concuurrencia esta afectando a un trabajo que se puede reazlizar muy rapido , obstruyendolo con el uso de hilos. En la version de un solo hilo se logra un speedup de 0.747, esto es por que el programa no tiene que esperar a que los hilos terminen para seguir con el siguiente ciclo.
 
 Vemos como entre menos cantidad de hilos se usan, el speedup es mayor. Esto es por que al usar muchos hilos se pierde tiempo en la sincronizacion de los hilos y en la gestion de los mismos. Por lo cual es mejor usar pocos hilos para un mejor rendimiento. En una matriz donde se pueda trabajar muchas filas y columnas de una manera veloz, se puede llegar a utilizar esta version concurrente ya que el tiempo invertido en sincronizacion y gestion es menor que el tiempo que se tarda en realizar el trabajo.
+
+Vemos como al usar OpenMP se logra un mejor rendimiento que al usar nuestra version de concurrencia. Esto es por que OpenMP esta optimizado para trabajar con hilos y tiene una gran cantidad de optimizaciones que nosotros no tenemos. Por lo cual es mejor usar OpenMP para este tipo de problemas.
+En conclusión, el grado de concurrencia afecta significativamente el desempeño y eficiencia de una solución de software. Utilizar un número adecuado de hilos, acorde a la naturaleza del problema y las características del hardware, es crucial para lograr un rendimiento óptimo. En este caso, se observó que un enfoque equilibrado entre concurrencia y serialidad permitió maximizar la eficiencia y reducir los tiempos de ejecución.
+
+== MPI
+
+[%autowidth.stretch,options="header"]
+|===
+|Iter. |Etiqueta |Duración (s) |_Speedup_ |Eficiencia |Descripción corta
+|0 |OPT1 |78.612 |1.00 |1.00 |Version OPtimized (Tarea03)
+|1 |OPM1 |56.060 |1.40 |0.175 |Versión con OpenMP (Tarea04)
+|2 |MPI1 |56.060 |1.40 |0.175 |Versión MPI con OpenMP(Tarea04)
+|===
+
+[[Optimized01]]
+=== Versión optimizada (Tarea03)
+Esta programa es una version en la que se implementa la tecnologia de concurrencia manual. En esta version se implementa un sistema de hilos que permite la ejecucion de tareas en paralelo, lo que mejora significativamente el rendimiento del programa. Ademas, se implementa un sistema de barreras que permite la sincronizacion de los hilos, lo que evita problemas de concurrencia y mejora la eficiencia del programa. Por ultimo, se implementa un sistema de mapeo dinamico en tiempo de ejecucion, lo que permite una mejor distribucion de las tareas entre los hilos y mejora el rendimiento del programa.
+
+[[OpenMP01]]
+=== Versión OpenMP (Tarea04)
+Esta versión del programa utiliza OpenMP para paralelizar el código de manera sencilla, lo que resulta en una ejecución más rápida y eficiente. OpenMP permite aprovechar al máximo los recursos del sistema al distribuir las tareas entre los hilos de manera eficiente. Esta implementación mejora significativamente el rendimiento del programa en comparación con la versión serial original.
+
+
+[[mpi_iter01]]
+=== Versión MPI inicial (Tarea04)
+En esta iteración se implementó una versión inicial de MPI. Esta versión permite la comunicación entre procesos utilizando el protocolo MPI, lo que facilita la distribución de tareas y la sincronización entre los diferentes procesos. Ademas, se optimizó el manejo de archivos para reducir el tiempo de apertura y cierre de los mismos, lo que contribuyó a mejorar el rendimiento general del programa. Por ultimo, se utilizo la tecnologia OpenMP para mejorar la eficiencia del programa. OpenMP permite paralelizar el código de manera sencilla, lo que resulta en una ejecución más rápida y eficiente.
+

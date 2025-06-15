@@ -98,12 +98,17 @@ void plate_charge_heat(int position, struct data_array *dat,
  *
  * @param dat Array de estructuras `data_array` desde donde se cargarán los datos.
  * @param plate_data Esctructura con los datos del job y el plate.
- * @param job Archivo al cual se le va a escribir la nueva informacion.
  * @param position Int para saber cual es la informacion del job correspondiente.
  */
 void jobs_out_file(struct data_array *dat, struct data_job *plate_data,
     int position);
 
+/**
+ * @brief Escribe el archivo final con los resultados de la simulacion.
+ * 
+ * @param filename Nombre del archivo que contiene los resultados de la simulación.
+ * @param job Nombre para el archivo de salida.
+ */
 void jobs_final_file(const char *filename, char job[]);
 
 /**

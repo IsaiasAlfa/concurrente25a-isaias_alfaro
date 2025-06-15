@@ -137,10 +137,6 @@ void jobs_out_file(struct data_array *dat,
 
 void jobs_final_file(const char *filename, char job[]) {
   FILE *file = fopen(filename, "r");
-  if (file == NULL) {
-    fprintf(stderr, "No se pudo abrir el archivo '%s' para lectura\n", filename);
-    return;
-  }
   data_job_t* array_job_print = calloc(30, sizeof(struct data_job));
   char job_filename[104];
 

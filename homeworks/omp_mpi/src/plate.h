@@ -61,7 +61,6 @@ int calculate_finish(int rank, int end, int workers, int begin);
  * @param data_job Estructura que contiene la información de la placa y los parámetros de simulación.
  * @param dat Array de datos que se utilizarán en la simulación.
  * @param cont_array Puntero a un entero que cuenta el número de datos procesados.
- * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
  */
 void make_matrix(data_job_t* data_job, data_array_t *dat,
     int *cont_array);
@@ -90,7 +89,6 @@ void heat_team(data_job_t* data_job);
  * placa.
  *
  * @param data_job Estructura que contiene la información de la placa y los parámetros de simulación.
- * @param thread_count Cantidad de hilos que se van a utilizar en la simulación.
  */
 void make_heat(data_job_t* data_job);
 
@@ -138,6 +136,8 @@ void free_matrix(struct data_job *plate_data);
  * @param job Nombre base del archivo de trabajo
  * @param job_size Tamano del nombre base
  * @param thread_count Cantidad de hilos para la ejecucion
+ * @param argc Puntero al contador de argumentos
+ * @param argv Puntero al array de argumentos
  * @return int Retorno para ver si hay algun error de entrada
  */
 int analyze_arguments(char* filename, size_t filename_size, char* job,

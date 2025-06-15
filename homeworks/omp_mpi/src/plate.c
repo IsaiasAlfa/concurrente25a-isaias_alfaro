@@ -3,6 +3,7 @@
 #include "plate.h"
 
 void make_data(const char *filename, char job[], uint64_t thread_count) {
+  // rango y mundo de MPI
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   int world = 0;
@@ -25,7 +26,7 @@ void make_data(const char *filename, char job[], uint64_t thread_count) {
   data_array_t* data_array = calloc(40, sizeof(struct data_array));
 
   int cont_array = 0;
-  // erro al asginar memoria
+  // error al asignar memoria
   if (data_job == NULL || data_array == NULL) {
     // Manejar errores de asignación de memoria
     fprintf(stderr, "Error al asignar memoria\n");
@@ -58,14 +59,12 @@ void make_matrix(data_job_t* data_job, data_array_t* data_array,
   // variable para guardar hilos maximos del usuario
   uint64_t threads_max = data_job->thread_count;
 
+  // Calculo para ver el principio y final de cada proceso
   const int process_start = calculate_start(rank,
     overall_finish, world, overall_start);
   const int process_finish = calculate_finish(rank,
     overall_finish, world, overall_start);
 
-  // imprimir el inicio y fin del proceso
-  printf("Proceso %d: inicio %d, fin %d\n", rank, process_start,
-    process_finish);
   // for para todas las veces que se ocupan hacer distintas simulaciones
   for (int i = process_start; i < process_finish; i++) {
     // cargar datos inciales
@@ -171,6 +170,7 @@ void heat_team(data_job_t* data_job) {
   data_job->balance = 0;
   uint64_t thread_count = data_job->thread_count;
 
+  // Inicio de la zona paralela
   #pragma omp parallel num_threads(thread_count) \
   default(none) shared(data_job) firstprivate(thread_count)
   {  // NOLINT(whitespace/braces)
@@ -182,7 +182,7 @@ void make_heat(data_job_t* data_job) {
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
 
-  // Iterar sobre las celdas de la matriz, excepto las fronteras
+  // While para el balance
   while (data_job->balance != 1) {
     #pragma omp barrier
     #pragma omp single
@@ -221,6 +221,7 @@ void make_heat(data_job_t* data_job) {
       }
     }
 
+    // Barrera para intercambio de buffers
     #pragma omp barrier
     #pragma omp single
     {
@@ -249,12 +250,14 @@ void matrix(int filas, int columnas, data_job_t* data_job) {
 }
 
 void free_matrix(data_job_t* data_job) {
+  // liberar la memoria
   free(data_job->past_warm);
   free(data_job->current_warm);
 }
 
 int analyze_arguments(char* filename, size_t filename_size, char* job,
     size_t job_size, uint64_t* thread_count, int* argc, char*** argv) {
+  // ver si dieron suficientes argumentos
   if (*argc < 3) {
     fprintf(stderr, "Uso: %s <archivo_tests> <cantidad_hilos>\n", (*argv)[0]);
     return -1;
@@ -286,12 +289,14 @@ int analyze_arguments(char* filename, size_t filename_size, char* job,
 }
 
 int calculate_start(int rank, int end, int workers, int begin) {
+  // Calcular elrango de inicio
   int range = end - begin;
   int min_val = (rank < (range % workers)) ? rank : (range % workers);
   return begin + rank * (range / workers) + min_val;
 }
 
 int calculate_finish(int rank, int end, int workers, int begin) {
+  // Calcular el rango final
   return calculate_start(rank + 1, end, workers, begin);
 }
 

@@ -48,11 +48,12 @@ image::./images/Threats.svg[Hilos]
 
 En este UML se quiere ejemplificar como es que estan trabajando los hilos, la funcion heat_team(verde) crea un equipo de hilos que son ejemplificados con las lineas azules, estos son enviados a trabajar en la matriz que se ejemplifica con las celdas negras y aplican la formula de calor que es la funcion make_heat, por ultimo cuando se termina el trabajo la funcion de heat_team elimina los hilos trabajadores y reporta el resultado de la matriz.
 
-== Pthread
+== OpenMP y MPI
+OpenMP y MPI son dos tecnologías utilizadas para la programación paralela, cada una con sus propias características y propósitos.
 
-El programa hará uso de pthreads, una biblioteca que permite la utilización de hilos (threads), los cuales ayudan a paralelizar tareas y crear concurrencia en los programas. En este caso, se aplicará seguridad condicional, que se basa en la reparticion de trabajo en distintas partes de la memoria. Con el objetivo de aumentar la velocidad de las simulaciones.
+OpenMP es una API que permite la programación paralela en C, C++ y Fortran. En este caso, se utiliza para paralelizar el proceso de simulación de calor en la lámina. Se emplean directivas de OpenMP para dividir el trabajo entre múltiples hilos, lo que mejora el rendimiento y reduce el tiempo de ejecución.
 
-En la imagen se observa cómo el método crea los hilos y los envía a trabajar. Cuando terminan, se vuelven a crear si es necesario otro conjunto para una nueva iteración, y se repite el proceso hasta alcanzar el equilibrio.
+MPI (Message Passing Interface) es un estándar para la comunicación entre procesos en sistemas distribuidos. En este caso, se utiliza para permitir que los hilos se comuniquen entre sí y compartan datos durante la simulación. MPI facilita la sincronización y la transferencia de información entre los hilos, lo que es esencial para garantizar que todos trabajen con los mismos datos y resultados.
 
 === Metodos
 

@@ -55,9 +55,7 @@ Para el uso del programa, primero se recomienda hacer la creacion del mismo pero
 
 . En la misma terminal de creacion, se tiene que escribir el siguiente comando "make run".
 . Este comando va a compilar y ejecutar la solución de la tarea. 
-. En este paso le va a solicitar una dirección de un documento.
-.. Debe darle la ruta del archivo, por favor asegúrese que el programa pueda acceder al mismo.
-.. El programa solo acepta archivos de nombre jobxxx.txt para su correcta ejecución.
+. En el archivo makefile propio de la tarea se prove un espacio  de 'ARGS' donde se pueden ingresar los argumentos que se le van a pasar al programa. En este caso, el argumento que se le debe pasar es el nombre del archivo de entrada, el cual debe ser un archivo de texto con la extensión .txt. Este archivo debe contener la información necesaria para la simulación, como se explica en la sección "Archivos del programa". Y por ultimo, la cantiadad de hilos que se van a utilizar en la simulación, este valor debe ser un número entero positivo.
 
 === Archivos del programa
 
@@ -73,11 +71,10 @@ Los archivos plate.bin son archivos binarios que contienen la informacion del ca
 
 === Ejemplo de ejecución
 
-[source, terminal]
-
-Ingresa el nombre del archivo: tests/job001.txt
-Nombre del archivo ingresado: job001 
-
+[source, makefile]
+--
+ARGS=tests/job001.txt 8
+--
 == Resultado del programa
 
 El programa luego de su finalización va ha haber creado una lista de archivos. Estos son de la siguiente forma:

@@ -116,6 +116,7 @@ void jobs_close_file(FILE *file) {
 
 void jobs_out_file(struct data_array *dat,
     struct data_job *plate_data, int position) {
+  // Creación de archivo para guardar la placa
   char state_plate[100];
   char *dot_position = strchr(dat[position].plate, '.');
   size_t base_length = dot_position - dat[position].plate;
@@ -137,12 +138,14 @@ void jobs_out_file(struct data_array *dat,
 
 void jobs_final_file(const char *filename, char job[]) {
   FILE *file = fopen(filename, "r");
+  // Arreglo para el archivo de salida
   data_job_t* array_job_print = calloc(30, sizeof(struct data_job));
   char job_filename[104];
 
   int cont_array = 0;
 
   char buffer[255];  // Buffer para almacenar cada línea leída del archivo
+  // Cargar los datos para el archvio de reporte
   while (fgets(buffer, sizeof(buffer), file) != NULL && cont_array < 30) {
     sscanf(buffer, "%s %lf %lf %lf %lf",
         array_job_print[cont_array].plate, &array_job_print[cont_array].time,
@@ -152,6 +155,7 @@ void jobs_final_file(const char *filename, char job[]) {
     cont_array++;
   }
 
+  // Esperar por las simulaciones de los procesos
   for (int i = 0; i < cont_array; i++) {
     int position, value;
     MPI_Status status;
@@ -179,6 +183,7 @@ void jobs_final_file(const char *filename, char job[]) {
       fprintf(job_file, "%s\n", time_file);
     }
   }
+  // Liberar la memoria
   fclose(job_file);
   free(array_job_print);
 }

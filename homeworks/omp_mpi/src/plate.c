@@ -3,7 +3,24 @@
 #include "plate.h"
 
 void make_data(const char *filename, char job[], uint64_t thread_count) {
-  // memoria para las distintas estructuras
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int world = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &world);
+
+  if (rank == 0) {
+    // crear carpeta out
+    mkdir("out", 0777);
+  }
+
+  // barrera para sincronizar todos los procesos
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  if (rank == 0) {
+    // escuchar respuestas
+    jobs_final_file(filename, job);
+  } else {
+// memoria para las distintas estructuras
   data_job_t* data_job = (data_job_t*) calloc(1, sizeof(data_job_t));
   data_array_t* data_array = calloc(40, sizeof(struct data_array));
 
@@ -16,30 +33,41 @@ void make_data(const char *filename, char job[], uint64_t thread_count) {
     free(data_array);
     return;
   }
-
-  data_job->thread_count = thread_count;
-  // buscar el archivo inicial y cargar todos sus datos
-  jobs_find_file(filename, data_array, &cont_array);
-  // creacion de las distintas simulaciones
-  make_matrix(data_job, data_array, &cont_array, job);
+    data_job->thread_count = thread_count;
+    // buscar el archivo inicial y cargar todos sus datos
+    jobs_find_file(filename, data_array, &cont_array);
+    // creacion de las distintas simulaciones
+    make_matrix(data_job, data_array, &cont_array);
+  }
 }
 
 void make_matrix(data_job_t* data_job, data_array_t* data_array,
-    int* cont_array, char job[]) {
+    int* cont_array) {
 
-  int position = *cont_array;
-  char job_filename[104];
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  rank = rank - 1;  // Ajustar el rango para que comience desde 0
 
-  // crear carpeta out
-  mkdir("out", 0777);
-  // crear archivo de salida
-  snprintf(job_filename, sizeof(job_filename), "out/%s.tsv", job);
-  FILE *job_file = fopen(job_filename, "w");
+  int world = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &world);
+  world = world - 1;
+
+  int overall_start = 0;
+  int overall_finish = *cont_array;
 
   // variable para guardar hilos maximos del usuario
   uint64_t threads_max = data_job->thread_count;
+
+  const int process_start = calculate_start(rank,
+    overall_finish, world, overall_start);
+  const int process_finish = calculate_finish(rank,
+    overall_finish, world, overall_start);
+
+  // imprimir el inicio y fin del proceso
+  printf("Proceso %d: inicio %d, fin %d\n", rank, process_start,
+    process_finish);
   // for para todas las veces que se ocupan hacer distintas simulaciones
-  for (int i = 0; i < position; i++) {
+  for (int i = process_start; i < process_finish; i++) {
     // cargar datos inciales
     plate_charge_RC(data_job, i, data_array);
     int rows = data_job->R;
@@ -61,14 +89,12 @@ void make_matrix(data_job_t* data_job, data_array_t* data_array,
     } else {
       heat_serial(data_job);
     }
-    // escribir el resultado
-    jobs_out_file(data_array, data_job, job_file, i);
+    // enviar el resultado al proceso 0
+    jobs_out_file(data_array, data_job, i);
     // liberar la matriz
     free_matrix(data_job);
     data_job->thread_count = threads_max;
   }
-  // cerrar los archivos
-  jobs_close_file(job_file);
   // liberar la memoria
   make_free(data_job, data_array);
 }
@@ -148,11 +174,11 @@ void heat_team(data_job_t* data_job) {
   #pragma omp parallel num_threads(thread_count) \
   default(none) shared(data_job) firstprivate(thread_count)
   {  // NOLINT(whitespace/braces)
-    make_heat(data_job, thread_count);  // NOLINT(readability/casting)
+    make_heat(data_job);  // NOLINT(readability/casting)
   }
 }
 
-void make_heat(data_job_t* data_job, uint64_t thread_count) {
+void make_heat(data_job_t* data_job) {
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
 
@@ -228,49 +254,44 @@ void free_matrix(data_job_t* data_job) {
 }
 
 int analyze_arguments(char* filename, size_t filename_size, char* job,
-    size_t job_size, uint64_t* thread_count) {
-  // variables para extrae el nombre base
-  char *start, *end;
-  char buffer[100];
-
-  // Leer nombre del archivo
-  printf("Ingresa el nombre del archivo: ");
-  if (fgets(filename, filename_size, stdin) == NULL) {
-      printf("Error al leer el nombre del archivo.\n");
-      return 1;
-  }
-  filename[strcspn(filename, "\n")] = '\0';
-
-  // Extraer nombre base sin extensión
-  start = strrchr(filename, '/');
-  start = (start != NULL) ? start + 1 : filename;
-  end = strchr(start, '.');
-
-  size_t length = (end != NULL) ? (size_t)(end - start) : strlen(start);
-  if (length >= job_size) {
-      printf("Error: el nombre del archivo es demasiado largo.\n");
-      return 1;
-  }
-  snprintf(job, job_size, "%.*s", (int)length, start);
-
-  // Validar que contiene "job"
-  if (strstr(job, "job") != NULL) {
-      printf("Nombre del archivo ingresado: %s\n", job);
-  } else {
-      printf("Nombre del archivo no encontrado o incorrecto.\n");
-      return 1;
+    size_t job_size, uint64_t* thread_count, int* argc, char*** argv) {
+  if (*argc < 3) {
+    fprintf(stderr, "Uso: %s <archivo_tests> <cantidad_hilos>\n", (*argv)[0]);
+    return -1;
   }
 
-  // Leer cantidad de hilos
-  printf("Ingrese la cantidad de hilos: ");
-  if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-      printf("Error al leer la cantidad de hilos.\n");
-      return 1;
+  // Copiar el nombre del archivo
+  strncpy(filename, (*argv)[1], filename_size - 1);
+  filename[filename_size - 1] = '\0';
+
+  // Extraer el nombre del trabajo sin extensión ni ruta
+  const char *slash = strrchr(filename, '/');
+  const char *basename = slash ? slash + 1 : filename;
+  const char *dot = strrchr(basename, '.');
+  size_t len = dot ? (size_t)(dot - basename) : strlen(basename);
+  if (len >= job_size) len = job_size - 1;
+  strncpy(job, basename, len);
+  job[len] = '\0';
+
+  // Leer la cantidad de hilos
+  char *endptr = NULL;
+  uint64_t threads = strtoull((*argv)[2], &endptr, 10);
+  if (endptr == (*argv)[2] || threads == 0) {
+    fprintf(stderr, "Cantidad de hilos inválida: %s\n", (*argv)[2]);
+    return -1;
   }
-  *thread_count = strtoull(buffer, NULL, 10);
-  if (*thread_count == 0) {
-      printf("Cantidad de hilos inválida.\n");
-      return 1;
-  }
+  *thread_count = threads;
+
   return 0;
 }
+
+int calculate_start(int rank, int end, int workers, int begin) {
+  int range = end - begin;
+  int min_val = (rank < (range % workers)) ? rank : (range % workers);
+  return begin + rank * (range / workers) + min_val;
+}
+
+int calculate_finish(int rank, int end, int workers, int begin) {
+  return calculate_start(rank + 1, end, workers, begin);
+}
+

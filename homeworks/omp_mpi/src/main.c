@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <mpi.h>
 
 #include "plate.h"
 
 
-int main() {
+int main(int argc, char* argv[]) {
   int error = EXIT_SUCCESS;
+  MPI_Init(&argc, &argv);
   // nombre completo del archivo
   char filename[100];
   // nombre para archvio de trabajo
@@ -17,10 +19,11 @@ int main() {
   uint64_t thread_count = sysconf(_SC_NPROCESSORS_ONLN);
   // analisis de argumentos
   error = analyze_arguments(filename, sizeof(filename), job,
-    sizeof(job), &thread_count);
+    sizeof(job), &thread_count, &argc, &argv);
   // llamado a funcion principal
   if (error == EXIT_SUCCESS) {
     make_data(filename, job, thread_count);
   }
+  MPI_Finalize();
   return 0;
 }

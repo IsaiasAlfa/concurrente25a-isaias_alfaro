@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <omp.h>
 #include <math.h>
+#include <mpi.h>
 
 #include "file.h"
 
@@ -24,6 +25,34 @@
 void make_data(const char *filename, char job[], uint64_t thread_count);
 
 /**
+ * @brief Calcula el índice de inicio para un proceso en un entorno distribuido.
+ *
+ * Esta función determina el índice de inicio para un proceso dado su rango,
+ * el número total de procesos, y el rango de inicio y fin del trabajo.
+ *
+ * @param rank Rango del proceso actual.
+ * @param end Índice final del trabajo.
+ * @param workers Número total de procesos (trabajadores).
+ * @param begin Índice inicial del trabajo.
+ * @return int Índice de inicio calculado para el proceso.
+ */
+int calculate_start(int rank, int end, int workers, int begin);
+
+/**
+ * @brief Calcula el índice de finalización para un proceso en un entorno distribuido.
+ *
+ * Esta función determina el índice de finalización para un proceso dado su rango,
+ * el número total de procesos, y el rango de inicio y fin del trabajo.
+ *
+ * @param rank Rango del proceso actual.
+ * @param end Índice final del trabajo.
+ * @param workers Número total de procesos (trabajadores).
+ * @param begin Índice inicial del trabajo.
+ * @return int Índice de finalización calculado para el proceso.
+ */
+int calculate_finish(int rank, int end, int workers, int begin);
+
+/**
  * @brief Crea la matriz de datos de calor y gestiona el proceso de simulación.
  *
  * Llama a las funciones para cargar datos y crear matrices de calor. Asigna y
@@ -35,7 +64,7 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
  */
 void make_matrix(data_job_t* data_job, data_array_t *dat,
-    int *cont_array, char job[]);
+    int *cont_array);
 
 /**
  * @brief Metodo que se llama cuando la matriz es muy pequeña y es mejor trabajar con un solo hilo.
@@ -63,7 +92,7 @@ void heat_team(data_job_t* data_job);
  * @param data_job Estructura que contiene la información de la placa y los parámetros de simulación.
  * @param thread_count Cantidad de hilos que se van a utilizar en la simulación.
  */
-void make_heat(data_job_t* data_job, uint64_t thread_count);
+void make_heat(data_job_t* data_job);
 
 /**
  * @brief Libera la memoria asignada para las estructuras de datos.
@@ -112,6 +141,6 @@ void free_matrix(struct data_job *plate_data);
  * @return int Retorno para ver si hay algun error de entrada
  */
 int analyze_arguments(char* filename, size_t filename_size, char* job,
-    size_t job_size, uint64_t* thread_count);
+    size_t job_size, uint64_t* thread_count, int* argc, char*** argv);
 
 #endif  // SRC_PLATE_H_ // Fin del guardia de inclusión

@@ -115,19 +115,7 @@ void jobs_close_file(FILE *file) {
 }
 
 void jobs_out_file(struct data_array *dat,
-    struct data_job *plate_data, FILE *job_out, int position) {
-  char time_file[20];
-  time_t seconds = (plate_data->time * plate_data->report);
-  // Guardar los datos en el archivo de salida
-  if (format_time(seconds, time_file, 20) != NULL) {
-    fprintf(job_out, "%s\t", dat[position].plate);
-    fprintf(job_out, "%g\t", plate_data->time);
-    fprintf(job_out, "%g\t", plate_data->material);
-    fprintf(job_out, "%g\t", plate_data->area);
-    fprintf(job_out, "%g\t", plate_data->epsilon);
-    fprintf(job_out, "%d\t", plate_data->report);
-    fprintf(job_out, "%s\n", time_file);
-  }
+    struct data_job *plate_data, int position) {
   char state_plate[100];
   char *dot_position = strchr(dat[position].plate, '.');
   size_t base_length = dot_position - dat[position].plate;
@@ -140,6 +128,63 @@ void jobs_out_file(struct data_array *dat,
   uint64_t move = plate_data->R * plate_data->C;
   fwrite(plate_data->current_warm, sizeof(double), move, file_plate);
   fclose(file_plate);
+
+  int value = plate_data->report;
+  // Enviar el nombre del archivo al proceso 0
+  MPI_Send(&position, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+  MPI_Send(&value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+}
+
+void jobs_final_file(const char *filename, char job[]) {
+  FILE *file = fopen(filename, "r");
+  if (file == NULL) {
+    fprintf(stderr, "No se pudo abrir el archivo '%s' para lectura\n", filename);
+    return;
+  }
+  data_job_t* array_job_print = calloc(30, sizeof(struct data_job));
+  char job_filename[104];
+
+  int cont_array = 0;
+
+  char buffer[255];  // Buffer para almacenar cada línea leída del archivo
+  while (fgets(buffer, sizeof(buffer), file) != NULL && cont_array < 30) {
+    sscanf(buffer, "%s %lf %lf %lf %lf",
+        array_job_print[cont_array].plate, &array_job_print[cont_array].time,
+        &array_job_print[cont_array].material,
+        &array_job_print[cont_array].area,
+        &array_job_print[cont_array].epsilon);
+    cont_array++;
+  }
+
+  for (int i = 0; i < cont_array; i++) {
+    int position, value;
+    MPI_Status status;
+    MPI_Recv(&position, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+    MPI_Recv(&value, 1, MPI_INT, status.MPI_SOURCE,
+      0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    array_job_print[position].report = value;
+  }
+
+  // crear archivo de salida
+  snprintf(job_filename, sizeof(job_filename), "out/%s.tsv", job);
+  FILE *job_file = fopen(job_filename, "w");
+  for (int simulations = 0; simulations < cont_array; simulations++) {
+    char time_file[20];
+    time_t seconds =
+      (array_job_print[simulations].time * array_job_print[simulations].report);
+    // Guardar los datos en el archivo de salida
+    if (format_time(seconds, time_file, 20) != NULL) {
+      fprintf(job_file, "%s\t", array_job_print[simulations].plate);
+      fprintf(job_file, "%g\t", array_job_print[simulations].time);
+      fprintf(job_file, "%g\t", array_job_print[simulations].material);
+      fprintf(job_file, "%g\t", array_job_print[simulations].area);
+      fprintf(job_file, "%g\t", array_job_print[simulations].epsilon);
+      fprintf(job_file, "%d\t", array_job_print[simulations].report);
+      fprintf(job_file, "%s\n", time_file);
+    }
+  }
+  fclose(job_file);
+  free(array_job_print);
 }
 
 char* format_time(const time_t seconds, char* text, const size_t capacity) {

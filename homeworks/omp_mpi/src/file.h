@@ -8,11 +8,13 @@
 #include <assert.h>
 #include <time.h>
 #include <string.h>
+#include <mpi.h>
 
 /**
 * @brief Estructura que contiene los datos de la placa y parámetros para la simulación de calor.
 */
 typedef struct data_job {
+  char plate[20];          // < Nombre de la placa o etiqueta.
   double time;        // < Tiempo de simulación.
   double material;    // < Propiedad del material.
   double area;        // < Área de la placa.
@@ -100,7 +102,9 @@ void plate_charge_heat(int position, struct data_array *dat,
  * @param position Int para saber cual es la informacion del job correspondiente.
  */
 void jobs_out_file(struct data_array *dat, struct data_job *plate_data,
-    FILE *job, int position);
+    int position);
+
+void jobs_final_file(const char *filename, char job[]);
 
 /**
  * @brief Escribe los resultados en el archvio job y su respectivo plate.

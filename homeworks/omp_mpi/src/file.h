@@ -24,6 +24,7 @@ typedef struct data_job {
   double burn;        // < Constante de calor en la simulacion
   double* past_warm;  // < Array del calor pasado
   double* current_warm;  // < Array del calor futuro
+  uint64_t thread_count;  // < Cantidad de hilos.
 } data_job_t;
 
 /**

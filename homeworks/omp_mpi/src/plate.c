@@ -6,34 +6,26 @@ void make_data(const char *filename, char job[], uint64_t thread_count) {
   // memoria para las distintas estructuras
   data_job_t* data_job = (data_job_t*) calloc(1, sizeof(data_job_t));
   data_array_t* data_array = calloc(40, sizeof(struct data_array));
-  shared_data_t* shared_data =
-    (shared_data_t*) calloc(1, sizeof(shared_data_t));
 
   int cont_array = 0;
   // erro al asginar memoria
-  if (data_job == NULL || data_array == NULL || shared_data == NULL) {
+  if (data_job == NULL || data_array == NULL) {
     // Manejar errores de asignación de memoria
     fprintf(stderr, "Error al asignar memoria\n");
     free(data_job);
     free(data_array);
-    free(shared_data);
     return;
   }
 
-  // incializar valores de shared_data
-  shared_data->data_job = data_job;
-  shared_data->thread_count = thread_count;
-
+  data_job->thread_count = thread_count;
   // buscar el archivo inicial y cargar todos sus datos
   jobs_find_file(filename, data_array, &cont_array);
   // creacion de las distintas simulaciones
-  make_matrix(shared_data, data_array, &cont_array, job);
+  make_matrix(data_job, data_array, &cont_array, job);
 }
 
-void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
+void make_matrix(data_job_t* data_job, data_array_t* data_array,
     int* cont_array, char job[]) {
-  // casteo de las estructuras para un manejo mas sencillo
-  data_job_t* data_job = shared_data->data_job;
 
   int position = *cont_array;
   char job_filename[104];
@@ -45,7 +37,7 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
   FILE *job_file = fopen(job_filename, "w");
 
   // variable para guardar hilos maximos del usuario
-  uint64_t threads_max = shared_data->thread_count;
+  uint64_t threads_max = data_job->thread_count;
   // for para todas las veces que se ocupan hacer distintas simulaciones
   for (int i = 0; i < position; i++) {
     // cargar datos inciales
@@ -56,37 +48,29 @@ void make_matrix(shared_data_t* shared_data, data_array_t* data_array,
     matrix(rows, cols, data_job);
     // cargar datos de calor
     plate_charge_heat(i, data_array, data_job);
-    // guardar cantiad maxima de hilos que pidio el usuario
-    shared_data->thread_count = threads_max;
 
     // mas hilos que filas
-    if (shared_data->thread_count > data_job->R) {
-      shared_data->thread_count = data_job->R;
+    if (data_job->thread_count > data_job->R) {
+      data_job->thread_count = data_job->R;
     }
-    double* balance_ar = calloc(shared_data->thread_count, sizeof(double));
-    shared_data->balance_ar = balance_ar;
-    for (uint64_t j = 0; j < shared_data->thread_count; j++) {
-      shared_data->balance_ar[j] = 1;
-    }
-    heat_team(shared_data);
-    /*
+
     if (data_job->C > 500 && data_job->R > 500
-      && shared_data->thread_count > 1) {
+      && data_job->thread_count > 1) {
       // equipo de hilos
-      heat_team(shared_data);
+      heat_team(data_job);
     } else {
-      // un solo hilo
       heat_serial(data_job);
-    }*/
+    }
     // escribir el resultado
     jobs_out_file(data_array, data_job, job_file, i);
     // liberar la matriz
     free_matrix(data_job);
+    data_job->thread_count = threads_max;
   }
   // cerrar los archivos
   jobs_close_file(job_file);
   // liberar la memoria
-  make_free(data_job, data_array, shared_data);
+  make_free(data_job, data_array);
 }
 
 void heat_serial(data_job_t* data_job) {
@@ -112,13 +96,12 @@ void heat_serial(data_job_t* data_job) {
     // Iterar sobre las celdas de la matriz, excepto las fronteras
     for (uint64_t i = 1; i < data_job->R - 1; i++) {
       for (uint64_t j = 1; j < data_job->C - 1; j++) {
-        uint64_t idx = i * data_job->C + j;  // Índice de la celda actual
+        uint64_t idx = i * data_job->C + j;
         uint64_t up = (i - 1) * data_job->C + j;
         uint64_t down = (i + 1) * data_job->C + j;
         uint64_t left = i * data_job->C + (j - 1);
         uint64_t right = i * data_job->C + (j + 1);
 
-        // Calcular la nueva temperatura utilizando el método de difusión
         auxiliar = burn * (
           past_warm[up] +
           past_warm[left] +
@@ -146,32 +129,8 @@ void heat_serial(data_job_t* data_job) {
   data_job->report = cycles;
 }
 
-void heat_team(shared_data_t* shared_data) {
-  // casteo de las estructuras para un manejo mas sencillo
-  data_job_t* data_job = shared_data->data_job;
-
-  // inicializar valores de shared_data
+void heat_team(data_job_t* data_job) {
   data_job->report = 0;
-  shared_data->work_available = 0;
-  shared_data->balance = 0;
-  shared_data->count = 0;
-  shared_data->count2 = 0;
-  // creacion del equipo de hilos(array)
-  pthread_t* threads = (pthread_t*)
-    calloc(shared_data->thread_count, sizeof(pthread_t));
-
-  // memoria privada de cada hilo
-  private_data_t* private_data = (private_data_t*)
-    calloc(shared_data->thread_count, sizeof(private_data_t));
-
-  // inicializar los semaforos
-  sem_init(&shared_data->mutex_work_available, 0, 1);
-  sem_init(&shared_data->mutex_balance, 0, 1);
-  sem_init(&shared_data->can_acces_count, 0, 1);
-  sem_init(&shared_data->can_acces_count2, 0, 1);
-  sem_init(&shared_data->barrier_exchange, 0, 0);
-  sem_init(&shared_data->barrier_work, 0, 0);
-
 
   // constante en la ejecucion de calor
   double burn = (data_job->time * data_job->material) /
@@ -183,127 +142,92 @@ void heat_team(shared_data_t* shared_data) {
     return;
   }
 
-  for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
-    ; ++thread_number) {
-    // asignacion de la memoria privada de cada hilo
-    private_data[thread_number].thread_number = thread_number;
-    private_data[thread_number].shared_data = shared_data;
+  data_job->balance = 0;
+  uint64_t thread_count = data_job->thread_count;
 
-    // creacion del equipo de hilos y guardarlos en el array de trabajo
-    pthread_create(&threads[thread_number], /*attr*/ NULL, make_heat
-      , /*arg*/ &private_data[thread_number]);
+  #pragma omp parallel num_threads(thread_count) \
+  default(none) shared(data_job) firstprivate(thread_count)
+  {  // NOLINT(whitespace/braces)
+    make_heat(data_job, thread_count);  // NOLINT(readability/casting)
   }
-
-  for (uint64_t thread_number = 0; thread_number < shared_data->thread_count
-    ; ++thread_number) {
-    pthread_join(threads[thread_number], /*value_ptr*/ NULL);
-  }
-  // liberar la memoriaque se utilizo para el equipo de hilos
-  sem_destroy(&shared_data->barrier_work);
-  sem_destroy(&shared_data->barrier_exchange);
-  sem_destroy(&shared_data->can_acces_count);
-  sem_destroy(&shared_data->can_acces_count2);
-  sem_destroy(&shared_data->mutex_work_available);
-  sem_destroy(&shared_data->mutex_balance);
-  free(private_data);
-  free(threads);
 }
 
-void* make_heat(void* data) {
-  // casteo de las estructuras para un manejo mas sencillo
-  private_data_t* private_data = (private_data_t*)data;
-  shared_data_t* shared_data = private_data->shared_data;
-  data_job_t* data_job = shared_data->data_job;
-
+void make_heat(data_job_t* data_job, uint64_t thread_count) {
   // auxiliar para ver comprobar el balance
   double auxiliar = 0;
-  u_int64_t work = 0;
+
+  // numero propio de hilo y cantidad totales de hilos
+  size_t thread_number = omp_get_thread_num();
+
+  // filas que le tocan a cada hilo
+  uint64_t rows_per_thread = data_job->R / thread_count;
+  // filas sobrantes por si no es divisible exacto
+  uint64_t remainder = data_job->R % thread_count;
+
+  // inicio de cada hilo en la matriz
+  uint64_t start = thread_number * rows_per_thread +
+    (thread_number < remainder ? thread_number : remainder);
+  // fin de cada hilo en la matriz
+  uint64_t end = start + rows_per_thread + (thread_number < remainder ? 1 : 0);
+
+  // caso especial primer hilo
+  if (start == 0) start = 1;
+  // caso especial ultimo hilo
+  if (end >= data_job->R) end = data_job->R - 1;
 
   // Iterar sobre las celdas de la matriz, excepto las fronteras
-  while (shared_data->balance != 1) {
-    sem_wait(&shared_data->can_acces_count);
-      shared_data->count = shared_data->count + 1;
-      if (shared_data->count == shared_data->thread_count) {
-        shared_data->balance = 1;
-        shared_data->work_available = 1;
-        shared_data->count = 0;
-        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
-          sem_post(&shared_data->barrier_work);
-        }
-      }
-    sem_post(&shared_data->can_acces_count);
-    sem_wait(&shared_data->barrier_work);
+  while (data_job->balance != 1) {
+    #pragma omp barrier
+    #pragma omp single
+    {
+      data_job->balance = 1;
+    }
+    // Iterar sobre las celdas de la matriz, excepto las fronteras
+    for (uint64_t i = start; i < end; i++) {
+      for (uint64_t j = 1; j < data_job->C - 1; j++) {
+        uint64_t idx = i * data_job->C + j;
+        uint64_t up = (i - 1) * data_job->C + j;
+        uint64_t down = (i + 1) * data_job->C + j;
+        uint64_t left = i * data_job->C + (j - 1);
+        uint64_t right = i * data_job->C + (j + 1);
 
-    while (1) {
-      sem_wait(&shared_data->mutex_work_available);
-        if (shared_data->work_available >= data_job->R - 1) {
-          // No hay más trabajo disponible
-          sem_post(&shared_data->mutex_work_available);
-          break;
-        }
-        work = shared_data->work_available++;
-      sem_post(&shared_data->mutex_work_available);
-      // Iterar sobre las celdas de la matriz, excepto las fronteras
-        for (uint64_t j = 1; j < data_job->C - 1; j++) {
-          // Calcular el índice de la celda actual
-          uint64_t idx = work * data_job->C + j;
-          uint64_t up = (work - 1) * data_job->C + j;
-          uint64_t down = (work + 1) * data_job->C + j;
-          uint64_t left = work * data_job->C + (j - 1);
-          uint64_t right = work * data_job->C + (j + 1);
+        auxiliar = data_job->burn * (
+          data_job->past_warm[up] +
+          data_job->past_warm[left] +
+          data_job->past_warm[right] +
+          data_job->past_warm[down] -
+          4 * data_job->past_warm[idx]);
 
-          // Calcular la nueva temperatura utilizando el método de difusión
-          auxiliar = data_job->burn * (
-            data_job->past_warm[up] +
-            data_job->past_warm[left] +
-            data_job->past_warm[right] +
-            data_job->past_warm[down] -
-            4 * data_job->past_warm[idx]);
+        data_job->current_warm[idx] = data_job->past_warm[idx] + auxiliar;
 
-          data_job->current_warm[idx] = data_job->past_warm[idx] + auxiliar;
+        double rest_heat = data_job->current_warm[idx]
+          - data_job->past_warm[idx];
 
-          double rest_heat = data_job->current_warm[idx]
-            - data_job->past_warm[idx];
-
-          if (fabs(rest_heat) > data_job->epsilon) {
-            shared_data->balance_ar[private_data->thread_number] = 0;
+        // Verificar si el calor restante es mayor que epsilon
+        if (fabs(rest_heat) > data_job->epsilon) {
+          #pragma omp critical
+          {
+            data_job->balance = 0;  // No está equilibrado
+          }
         }
       }
     }
 
-    // Intercambiar buffers
-    sem_wait(&shared_data->can_acces_count2);
-      shared_data->count2 = shared_data->count2 + 1;
-      if (shared_data->count2 == shared_data->thread_count) {
-        shared_data->count2 = 0;
-        // Intercambiar buffers
-        double *ptr_auxiliar = data_job->past_warm;
-        data_job->past_warm = data_job->current_warm;
-        data_job->current_warm = ptr_auxiliar;
+    #pragma omp barrier
+    #pragma omp single
+    {
+      // Intercambiar buffers
+      double *ptr_auxiliar = data_job->past_warm;
+      data_job->past_warm = data_job->current_warm;
+      data_job->current_warm = ptr_auxiliar;
 
-        data_job->report = data_job->report + 1;
-        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
-          if (shared_data->balance_ar[i] == 0) {
-            shared_data->balance = 0;
-            shared_data->balance_ar[i] = 1;
-            break;
-          }
-        }
-        for (u_int64_t i = 0; i < shared_data->thread_count; i++) {
-          sem_post(&shared_data->barrier_exchange);
-        }
-      }
-    sem_post(&shared_data->can_acces_count2);
-    sem_wait(&shared_data->barrier_exchange);
+      data_job->report = data_job->report + 1;
+    }
   }
-  return NULL;
 }
 
-void make_free(data_job_t* data_job, data_array_t* data_array,
-  shared_data_t* shared_data) {
+void make_free(data_job_t* data_job, data_array_t* data_array) {
   // liberar la memoria de los estructs principales
-  free(shared_data->balance_ar);
-  free(shared_data);
   free(data_job);
   free(data_array);
 }
@@ -317,7 +241,6 @@ void matrix(int filas, int columnas, data_job_t* data_job) {
 }
 
 void free_matrix(data_job_t* data_job) {
-  // liberar la memoria de los arrays
   free(data_job->past_warm);
   free(data_job->current_warm);
 }
@@ -367,6 +290,5 @@ int analyze_arguments(char* filename, size_t filename_size, char* job,
       printf("Cantidad de hilos inválida.\n");
       return 1;
   }
-
   return 0;
 }

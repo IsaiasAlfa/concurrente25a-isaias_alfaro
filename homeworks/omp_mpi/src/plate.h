@@ -6,40 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <omp.h>
 #include <pthread.h>
 #include <math.h>
 
 #include "file.h"
-
-/**
- * @struct shared_data
- * @brief Estructura que almacena los datos compartidos de los hilos.
- */
-typedef struct shared_data {
-    sem_t mutex_work_available;  // < Semaforo para el trabajo disponible
-    sem_t mutex_balance;  // < Semaforo para el balance
-    sem_t can_acces_count;  // < Semaforo para el acceso a count
-    sem_t can_acces_count2;  // < Semaforo para el acceso a count2
-    sem_t barrier_exchange;  // < Semaforo para la barrera de intercambio
-    sem_t barrier_work;  // < Semaforo para la barrera de trabajo
-    uint64_t work_available;  // < Variable para el trabajo disponible
-    uint64_t balance;  // < Variable para el balance
-    uint64_t count;  // < Contador de iteraciones
-    uint64_t count2;  // < Contador de iteraciones
-    double* balance_ar;  // < Array para el balance de calor
-    data_job_t* data_job;  // < Puntero a los datos importantes de la simulacion
-    uint64_t thread_count;  // < Cantidad de hilos
-}shared_data_t;
-
-/**
- * @struct private_data
- * @brief Estructura que almacena los datos privados de cada hilo.
- */
-typedef struct private_data {
-    uint64_t thread_number;  // < numero de hilo
-    shared_data_t* shared_data;  // < puntero a la informacion compartida
-}private_data_t;
-
 
 /**
  * @brief Crea y gestiona los datos para la simulación de calor.
@@ -60,12 +31,12 @@ void make_data(const char *filename, char job[], uint64_t thread_count);
  * Llama a las funciones para cargar datos y crear matrices de calor. Asigna y
  * libera memoria para la matriz de calor durante el proceso.
  *
- * @param shared_data Estructura que contiene la información de la placa.
+ * @param data_job Estructura que contiene la información de la placa y los parámetros de simulación.
  * @param dat Array de datos que se utilizarán en la simulación.
  * @param cont_array Puntero a un entero que cuenta el número de datos procesados.
  * @param job Nombre del trabajo que se utilizará para generar el archivo de salida.
  */
-void make_matrix(shared_data_t* shared_data, data_array_t *dat,
+void make_matrix(data_job_t* data_job, data_array_t *dat,
     int *cont_array, char job[]);
 
 /**
@@ -81,9 +52,9 @@ void heat_serial(data_job_t* data_job);
  * Crea los equipos de hilos que van a simular la tranferencia de calor en la placa
  * tambien los elimina y vuelve a crear para otra iteracion.
  * 
- * @param shared_data Puntero a la estructura que contiene los datos compartidos de los hilos.
+ * @param data_job Estructura que contiene la información de la placa.
  */
-void heat_team(shared_data_t* shared_data);
+void heat_team(data_job_t* data_job);
 
 /**
  * @brief Calcula y actualiza la distribución de calor en la placa.
@@ -91,9 +62,10 @@ void heat_team(shared_data_t* shared_data);
  * Utiliza el método de difusión para calcular la distribución del calor en la
  * placa.
  *
- * @param data Puntero con la información privada de cada hilo para su correcta ejecución.
+ * @param data_job Estructura que contiene la información de la placa y los parámetros de simulación.
+ * @param thread_count Cantidad de hilos que se van a utilizar en la simulación.
  */
-void* make_heat(void* data);
+void make_heat(data_job_t* data_job, uint64_t thread_count);
 
 /**
  * @brief Libera la memoria asignada para las estructuras de datos.
@@ -103,10 +75,8 @@ void* make_heat(void* data);
  *
  * @param data_job Estructura que contiene la información de la placa.
  * @param data_array Array de datos que se utilizarán en la simulación.
- * @param shared_data Estructura de datos compartidos.
  */
-void make_free(data_job_t* data_job, data_array_t* data_array,
-    shared_data_t* shared_data);
+void make_free(data_job_t* data_job, data_array_t* data_array);
 
 /**
  * @brief Crea la matriz para la simulacion

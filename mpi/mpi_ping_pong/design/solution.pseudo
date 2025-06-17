@@ -1,0 +1,7 @@
+procedure main(argc, argv[])
+  const milliseconds = int(argv[1]);
+  while true do
+    print " {process_number} serves";
+    delay(milliseconds)
+  end while
+end procedure

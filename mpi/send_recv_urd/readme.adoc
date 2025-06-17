@@ -1,0 +1,9 @@
+= Indeterminismo en orden de recepción de mensajes
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
+Con comunicación punto a punto haga que los procesos saluden al proceso intermediario y éste reporte los saludos en el orden en que los recibió.

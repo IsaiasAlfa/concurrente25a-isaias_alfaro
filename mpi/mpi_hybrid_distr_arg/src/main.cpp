@@ -30,10 +30,9 @@ int main(int argc, char* argv[]) {
 
       #pragma omp parallel default(none) \
         shared(process_start, process_finish, std::cout, mpi)
-      {  // NOLINT()
+      {  // NOLINT(?)
         int thread_start = -1;
         int thread_finish = -1;
-
 
         #pragma omp for
         for (int index = process_start; index < process_finish; ++index) {
@@ -51,6 +50,7 @@ int main(int argc, char* argv[]) {
             << '.' << omp_get_thread_num() << ": range [" << thread_start << ", "
             << thread_finish << "[ size " << thread_size << std::endl;
       }
+
     } else {
       std::cerr << "usage: hybrid_distr_arg start finish" << std::endl;
     }
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 
 int calculate_start(int rank, int end, int workers, int begin) {
   const int range = end - begin;
-  return begin + rank * (rank / workers) + std::min(rank, range % workers);
+  return begin + rank * (range / workers) + std::min(rank, range % workers);
 }
 
 int calculate_finish(int rank, int end, int workers, int begin) {

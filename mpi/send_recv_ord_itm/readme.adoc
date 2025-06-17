@@ -1,0 +1,11 @@
+= Saludar en orden centralizando en un proceso intermediario
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
+Haga que los procesos saluden en orden por su identificador (_rank_) a través de un intermediario. Es decir, los procesos envían su saludo a uno del equipo, quien recibe los saludos y los imprime en la salida estándar en orden.
+
+Al usar un itermediario con comunicación punto a punto, se simula "seguridad condicional". Note que los saludos son información vectorial y no escalar. Tenga presente que no es posible enviar datos discontinuos de la memoria a través de la red en una operación de _send/receive_.

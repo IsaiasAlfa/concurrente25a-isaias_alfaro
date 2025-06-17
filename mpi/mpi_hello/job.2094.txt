@@ -1,0 +1,10 @@
+[prun] Master compute host = compute-1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpiexec.hydra -bootstrap slurm bin/mpi_hello (family=mpich)
+Hello from main thread of process 3 of 7 on compute-4
+Hello from main thread of process 0 of 7 on compute-1
+Hello from main thread of process 4 of 7 on compute-6
+Hello from main thread of process 5 of 7 on compute-7
+Hello from main thread of process 6 of 7 on compute-8
+Hello from main thread of process 1 of 7 on compute-2
+Hello from main thread of process 2 of 7 on compute-3

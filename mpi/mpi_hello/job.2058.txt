@@ -1,0 +1,10 @@
+[prun] Master compute host = compute-1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpiexec.hydra -bootstrap slurm hostname (family=mpich)
+compute-1
+compute-3
+compute-2
+compute-8
+compute-6
+compute-4
+compute-7

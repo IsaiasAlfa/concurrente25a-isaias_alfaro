@@ -114,7 +114,6 @@ class Mpi {
     return this->send(values.data(), values.size(), toProcess, tag, "vector");
   }
   /// Send a text to another process
-  template <typename Type>
   void send(const std::string& text, const int toProcess, const int tag = 0) {
     return this->send(text.data(), text.size() + 1, toProcess, tag, "string");
   }
@@ -142,7 +141,6 @@ class Mpi {
     this->receive(values.data(), capacity, fromProcess, tag, "vector");
   }
   /// Wait until it receives a text of at most length chars from another process
-  template <typename Type>
   void receive(std::string& text, const int capacity,
       const int fromProcess = MPI_ANY_SOURCE, const int tag = MPI_ANY_TAG) {
     std::vector<char> buffer(capacity, '\0');

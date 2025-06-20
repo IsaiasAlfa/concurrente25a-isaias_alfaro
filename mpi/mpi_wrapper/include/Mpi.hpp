@@ -91,7 +91,7 @@ class Mpi {
   static inline MPI_Datatype map(long double) { return MPI_LONG_DOUBLE; }
 
  public:  // Send
-  /// Send a scalar value to another process
+  // Send a scalar value to another process
   template <typename Type>
   void send(const Type& value, const int toProcess, const int tag = 0) {
     return this->send(&value, /*count*/ 1, toProcess, tag, "value");
@@ -171,5 +171,16 @@ class Mpi {
         tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE) != MPI_SUCCESS) {
       throw Mpi::Error("could not receive " + type, *this);
     }
+  }
+
+ public:
+  void barrier() {
+    if (MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS) {
+      throw Mpi::Error("could not wait barrier ", *this);
+    }
+  }
+
+  inline static double wtime() {
+    return MPI_Wtime();
   }
 };

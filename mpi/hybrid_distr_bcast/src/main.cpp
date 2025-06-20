@@ -20,42 +20,12 @@ int main(int argc, char* argv[]) {
       overall_start = atoi(argv[1]);
       overall_finish = atoi(argv[2]);
     } else {
+
       if (mpi.rank() == 0) {
         std::cin >> overall_start >> overall_finish;
-        for (int destination = 1; destination < mpi.size(); ++destination) {
-          // if (MPI_Send(&overall_start, /*count*/ 1, MPI_INT, destination,
-          //   /*tag*/ 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
-          //   throw Mpi::Error("could not send start", mpi);
-          // }
-          // if (MPI_Send(&overall_finish, /*count*/ 1, MPI_INT, destination,
-          //   /*tag*/ 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
-          //   throw Mpi::Error("could not send finish", mpi);
-          // }
-          // mpi.send(overall_start, destination);
-          // mpi.send(overall_finish, destination);
-          //  /*const*/ int range[2] = { overall_start, overall_finish };
-          // mpi.send(range, 2, destination);
-          std::vector<int> range = { overall_start, overall_finish };
-          mpi.send(range, destination);
-        }
-      } else {
-        // if (MPI_Recv(&overall_start, /*count*/ 1, MPI_INT, /*source*/ 0,
-        //   /*tag*/ 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) != MPI_SUCCESS)  {
-        //   throw Mpi::Error("could not receive start", mpi);
-        // }
-        // if (MPI_Recv(&overall_finish, /*count*/ 1, MPI_INT, /*source*/ 0,
-        //   /*tag*/ 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) != MPI_SUCCESS)  {
-        //   throw Mpi::Error("could not receive finish", mpi);
-        // }
-        // mpi.receive(overall_start, 0);
-        // mpi.receive(overall_finish, 0);
-        // int range[2] = {-1, -1};
-        // mpi.receive(range, 2, 0);
-        std::vector<int> range(2, -1);
-        mpi.receive(range, 2, 0);
-        overall_start = range[0];
-        overall_finish = range[1];
       }
+      mpi.broadcast(overall_start, 0);
+      mpi.broadcast(overall_finish, 0);
     }
 
     const int process_start = calculate_start(mpi.rank(), overall_finish

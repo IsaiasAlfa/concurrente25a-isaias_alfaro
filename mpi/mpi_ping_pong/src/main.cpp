@@ -27,6 +27,7 @@ void play_ping_pong(Mpi& mpi, const long delay) {
   int partner = 0;
 
   if (mpi.rank() == 0) {
+    std::cout << mpi.rank() << " serves" << ball++ <<std::endl;
     mpi.send(ball, mpi.rank() + 1);
     partner = mpi.rank() + 1;
   }

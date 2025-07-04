@@ -1,0 +1,17 @@
+procedure main()
+  while true do
+    case read_char() of
+      'R': create_thread(reader)
+      'W': create_thread(writer)
+      EOF: return
+    end case
+  end while
+end procedure
+
+procedure reader()
+  read()
+end procedure
+
+procedure writer()
+  write()
+end procedure

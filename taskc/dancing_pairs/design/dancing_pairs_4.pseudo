@@ -13,13 +13,15 @@ end procedure
 procedure male()
   wait(male_queue)
     wait(room_barrier) // Wait ti enter to room
+      dance()
+    wait(room_barrier) // wait to exti rom, optional, but tidy
   signal(male_queue)
-  dance()
 end procedure
 
 procedure female()
-  wait(female_queue)
-    wait(room_barrier) // Wait ti enter to room
-  signal(female_queue)
-  dance()
+wait(female_queue)
+  wait(room_barrier) // Wait ti enter to room
+    dance()
+  wait(room_barrier) // wait to exti rom, optional, but tidy
+signal(female_queue)
 end procedure

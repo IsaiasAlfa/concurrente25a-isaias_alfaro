@@ -1,0 +1,31 @@
+procedure main()
+  shared male_queue := semaphore(2)
+  shared female_queue := semaphore(2)
+  shared room_barrier := barrier(4)
+  read shared room_capacity as int
+  shared multiplex := semaphore(2 * room_capacity)
+  while read genre do
+    case genre of
+      'M': create_thread(male)
+      'W': create_thread(female)
+    end case
+  end while
+end procedure
+
+procedure male()
+  wait(male_queue)
+    wait(room_barrier) // Wait ti enter to room
+      wait(multiplex) // wait to exti rom, optional, but tidy
+    signal(male_queue)
+    dance()
+  signal(multiplex)
+end procedure
+
+procedure female()
+wait(female_queue)
+  wait(room_barrier) // Wait ti enter to room
+    wait(multiplex) // wait to exti rom, optional, but tidy
+  signal(female_queue)
+  dance()
+signal(multiplex)
+end procedure

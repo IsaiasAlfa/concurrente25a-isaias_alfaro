@@ -1,4 +1,10 @@
+// Solucion con inanicion
 procedure main()
+  shared can_acces_medium := sempahore(1)
+  shared reader_count := 0
+  shared can_acces_reader_count := sempahore(1)
+
+
   while true do
     case read_char() of
       'R': create_thread(reader)
@@ -9,9 +15,23 @@ procedure main()
 end procedure
 
 procedure reader()
+  wait (can_acces_reader_count)
+    if ++reader_count = 1 then
+      wait(can_acces_medium)
+    end if
+  signal (can_acces_reader_count)
+
   read()
+
+  wait (can_acces_reader_count)
+    if --reader_count = 0 then
+      signal (can_acces_medium)
+    end if
+  signal (can_acces_reader_count)
 end procedure
 
 procedure writer()
+  wait (can_acces_medium)
   write()
+  signal (can_acces_medium)
 end procedure

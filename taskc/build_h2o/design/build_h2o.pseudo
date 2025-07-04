@@ -1,0 +1,16 @@
+procedure main()
+  while read atom do
+    case atom of
+      'H': create_thread(hydrogen)
+      'O': create_thread(oxygen)
+    end case
+  end while
+end procedure
+
+procedure hydrogen()
+  bond()
+end procedure
+
+procedure oxygen()
+  bond()
+end procedure

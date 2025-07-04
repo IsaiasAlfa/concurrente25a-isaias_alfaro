@@ -1,0 +1,85 @@
+= Parejas de baile
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+
+[[dancing_pairs_1]]
+== Parte 1
+
+En una academia de artes las personas aprendices están entrenando bailes criollos, los cuales se bailan en parejas de un hombre con una mujer. Como es natural, las personas bailarinas no llegan todas al mismo tiempo al salón. Cuando se aproximan a este salón hacen dos grupos o filas, una de hombres y otra de mujeres. Cuando en ambas filas hay personas, un hombre y una mujer se toman de la mano e ingresan al salón de baile.
+
+Naturalmente si una o varias mujeres llegan a la fila y la fila de hombres está vacía, tendrán que esperar. Lo mismo ocurre si los hombres llegan y encuentran la fila de mujeres vacía.
+
+Simule con hilos de ejecución a las personas bailarinas, su espera en las colas, y el ingreso al salón de baile. Inmediatamente que hayan ingresado, bailarán, lo cual es indicado por la subrutina `dance()`. Suponga que las personas bailarinas se leen de la entrada estándar donde `W` indica una mujer y `M` un hombre como muestra el siguiente código. Suponga además que el salón tiene capacidad ilimitada para el número de parejas.
+
+_Sugerencia_. Un semáforo puede representar una cola de espera. Un valor inicial de 0 indica que la cola está vacía. Recuerde que un valor negativo indica la cantidad de hilos esperando en ella.
+
+[source,delphi,linenums]
+.Solución 1
+----
+include::design/dancing_pairs_1.pseudo[]
+----
+
+
+
+
+
+
+[[dancing_pairs_2]]
+== Parte 2
+
+Modifique su solución al problema <<dancing_pairs_1>>. Suponga que se trata de un examen o audición, y por tanto, sólo una pareja puede estar en el salón de baile a la vez con el fin de que el jurado pueda calificarlos. Asegúrese de que realmente los bailarines entren en pareja al salón de baile. Es decir, que un hombre invoque `dance()` concurrentemente con una única mujer y viceversa.
+
+[source,delphi,linenums]
+.Solución 2
+----
+include::design/dancing_pairs_2.pseudo[]
+----
+
+
+
+[[dancing_pairs_3]]
+== Parte 3
+
+Modifique su solución al problema <<dancing_pairs_2>> para asegurarse que los bailarines entren en pareja al salón de baile, el cual tiene capacidad ilimitada para la cantidad de parejas.
+
+[source,delphi,linenums]
+.Solución 3
+----
+include::design/dancing_pairs_3.pseudo[]
+----
+
+
+
+
+
+[[dancing_pairs_4]]
+== Parte 4
+
+Modifique su solución al problema <<dancing_pairs_3>> para asegurarse que los bailarines entren en pareja al salón de baile, el cual tiene una capacidad limitada para la cantidad de parejas dada en argumentos de línea de comandos (o si lo prefiere, la entrada estándar).
+
+Si el salón está lleno, las nuevas parejas deberán esperar a que se libere espacio. Las parejas en el salón bailan hasta cansarse.
+
+[source,delphi,linenums]
+.Solución 4
+----
+include::design/dancing_pairs_4.pseudo[]
+----
+
+
+
+[[dancing_pairs_5]]
+== Parte 5
+
+Modifique su solución al problema <<dancing_pairs_4>> para un baile criollo donde se forman, no parejas, sino equipos de 4 bailarines compuestos de dos hombres y dos mujeres.
+
+[source,delphi,linenums]
+.Solución 6
+----
+include::design/dancing_pairs_5.pseudo[]
+----

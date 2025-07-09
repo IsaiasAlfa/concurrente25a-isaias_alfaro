@@ -13,11 +13,17 @@ class DishStack {
 
  public:
   /// Return true if the stack is empty, false otherwise
-  bool empty() {
+  int empty() {
     this->mutex.lock();
     const bool result = this->stack.empty();
-    this->mutex.unlock();
-    return result;
+    if (result) {
+      this->mutex.unlock();
+      return -1;
+    } else {
+      const int dish = this->pop();
+      this->mutex.unlock();
+      return dish;
+    }
   }
   /// Return the number of dishes in the stack
   size_t size() {
@@ -35,10 +41,8 @@ class DishStack {
   /// Pop the top element from the stack and return its value
   /// Precondition: the stack must be not empty
   int pop() {
-    this->mutex.lock();
     const int value = stack.top();
     stack.pop();
-    this->mutex.unlock();
     return value;
   }
 };
@@ -51,10 +55,13 @@ void wash(const int dish) {
 }
 
 void wash_dishes() {
-  while (!dishes.empty()) {
-    // Pop a dish from the stack
-    const int dish = dishes.pop();
-    wash(dish);
+  while (true) {
+    const int dish = dishes.empty();
+    if(dish == -1) {
+      break;
+    } else {
+      wash(dish);
+    }    
   }
 }
 

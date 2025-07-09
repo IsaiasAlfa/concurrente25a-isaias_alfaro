@@ -9,10 +9,9 @@
 #define PHILOS 5  // Number of philosophers
 
 size_t rounds = 0;  // Number of rounds each philosopher will eat and think
-size_t food = 0;  // Initial servings of food in central plate
+_Atomic(size_t) food = 0;  // Initial servings of food in central plate
 pthread_mutex_t chopsticks[PHILOS];
 pthread_mutex_t can_serve;
-sem_t can_eat;
 sem_t order_food;
 sem_t finish_order;
 
@@ -26,8 +25,6 @@ void eat(const size_t id);
 int main() {
   // Mutex para poder srvirse la comida
   pthread_mutex_init(&can_serve, NULL);
-  // Inicializar el semaforo solo para que 4 coman al mismo tiempo
-  sem_init(&can_eat, 0 , PHILOS - 1);
   // Aviso al mesero para mas comida
   sem_init(&order_food, 0 , 1);
   // Aviso de la comida servida
@@ -44,7 +41,6 @@ int main() {
   }
   sem_destroy(&finish_order);
   sem_destroy(&order_food);
-  sem_destroy(&can_eat);
   pthread_mutex_destroy(&can_serve);
   return 0;
 }
@@ -73,11 +69,9 @@ void* philosopher(void* data) {
   // Think and eat for each round
   for (size_t round = 0; round < rounds; ++round) {
     think(id);
-    sem_wait(&can_eat);
     get_chopsticks(id);
     eat(id);
     put_chopsticks(id);
-    sem_post(&can_eat);
   }
   return NULL;
 }
@@ -85,9 +79,15 @@ void* philosopher(void* data) {
 void get_chopsticks(const size_t id) {
   const size_t right = id;
   const size_t left = (id + 1) % PHILOS;
-  pthread_mutex_lock(&chopsticks[right]);
-  pthread_mutex_lock(&chopsticks[left]);
-}
+  if ((id % 2) == 0) {
+    pthread_mutex_lock(&chopsticks[right]);
+    pthread_mutex_lock(&chopsticks[left]);
+  } else {
+    pthread_mutex_lock(&chopsticks[left]);
+    pthread_mutex_lock(&chopsticks[right]);
+  }
+  }
+
 
 void put_chopsticks(const size_t id) {
   const size_t right = id;

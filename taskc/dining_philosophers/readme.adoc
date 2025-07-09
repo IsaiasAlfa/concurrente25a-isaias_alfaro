@@ -1,0 +1,21 @@
+= Filósofos comensales
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:sectnums:
+:stem: latexmath
+:toc:
+:xrefstyle: short
+
+Corrija el siguiente pseudocódigo de concurrencia de recursos compartidos para que resuelva el problema de los filósofos comensales, y por lo tanto, logre cumplir con los tres requerimientos.
+
+[source,delphi,linenums]
+----
+include::dining_philosophers_laterality.pseudo[]
+----
+
+Considere las condiciones que son necesarias para que el bloqueo mutuo o la inanición ocurran, y cambie una de ellas a la vez para generar distintas soluciones:
+
+. Considere la lateralidad de los filósofos.
+. Considere la cantidad de filósofos que pueden comer concurrentemente.
+. Haga que los filósofos decidan con variables protegidas por exclusión mutua.

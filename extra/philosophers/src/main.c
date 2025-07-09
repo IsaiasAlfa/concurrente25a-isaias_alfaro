@@ -11,6 +11,10 @@
 size_t rounds = 0;  // Number of rounds each philosopher will eat and think
 size_t food = 0;  // Initial servings of food in central plate
 pthread_mutex_t chopsticks[PHILOS];
+pthread_mutex_t can_serve;
+sem_t can_eat;
+sem_t order_food;
+sem_t finish_order;
 
 void create_threads(void);
 void* philosopher(void* data);
@@ -20,6 +24,14 @@ void think(const size_t id);
 void eat(const size_t id);
 
 int main() {
+  // Mutex para poder srvirse la comida
+  pthread_mutex_init(&can_serve, NULL);
+  // Inicializar el semaforo solo para que 4 coman al mismo tiempo
+  sem_init(&can_eat, 0 , PHILOS - 1);
+  // Aviso al mesero para mas comida
+  sem_init(&order_food, 0 , 1);
+  // Aviso de la comida servida
+  sem_init(&finish_order, 0 , 1);
   scanf("%zu", &rounds);  // Number of rounds is provided in stdin
   // Create chopsticks
   for (size_t index = 0; index < PHILOS; ++index) {
@@ -30,6 +42,10 @@ int main() {
   for (size_t index = 0; index < PHILOS; ++index) {
     pthread_mutex_destroy(&chopsticks[index]);
   }
+  sem_destroy(&finish_order);
+  sem_destroy(&order_food);
+  sem_destroy(&can_eat);
+  pthread_mutex_destroy(&can_serve);
   return 0;
 }
 
@@ -41,8 +57,10 @@ void create_threads(void) {
   }
   // Serve food for each round
   for (size_t serve = 0; serve < rounds; ++serve) {
+    sem_wait(&order_food);
     printf("Waiter serving food...\n");
     food += PHILOS;  // Serve more food
+    sem_post(&finish_order);
   }
   // Wait for all philosophers to finish in order to close the restaurant
   for (size_t id = 0; id < PHILOS; ++id) {
@@ -55,9 +73,11 @@ void* philosopher(void* data) {
   // Think and eat for each round
   for (size_t round = 0; round < rounds; ++round) {
     think(id);
+    sem_wait(&can_eat);
     get_chopsticks(id);
     eat(id);
     put_chopsticks(id);
+    sem_post(&can_eat);
   }
   return NULL;
 }
@@ -82,10 +102,13 @@ void think(const size_t id) {
 }
 
 void eat(const size_t id) {
+  pthread_mutex_lock(&can_serve);
   if (food == 0) {
-    // TODO(you): Ask for more food
+    sem_post(&order_food);
+    sem_wait(&finish_order);
   }
   --food;  // Consume one serving of food
+  pthread_mutex_unlock(&can_serve);
   printf("Philosopher %zu is eating...\n", id);
   usleep(50000);  // Simulate eating for 50 milliseconds
 }

@@ -8,7 +8,7 @@ Simulate how heat spreads across a rectangular metal plate until it reaches ther
 
 $$T^{k+1}_{i,j} = T^k_{i,j} + \frac{\Delta t \cdot \alpha}{h^2}\left(T^k_{i-1,j} + T^k_{i,j+1} + T^k_{i+1,j} + T^k_{i,j-1} - 4T^k_{i,j}\right)$$
 
-The simulation stops when the largest temperature change across the whole plate drops below a threshold ε. Plates are large and the stopping point is data-dependent, so runtimes vary from seconds to tens of minutes depending on the input.
+The simulation stops when the largest temperature change across the whole plate drops below a threshold ε. Plates are large, and the stopping point is data-dependent, so runtimes vary from seconds to tens of minutes depending on the input.
 
 ## Results
 
@@ -21,7 +21,7 @@ Measured on the same plate and machine across all versions.
 | Serial (initial) | 78.6 s | 1.00× | Baseline |
 | Serial (optimized) | **58.5 s** | **1.34×** | Flat linear arrays instead of 2D matrix indexing |
 
-Callgrind profiling showed the cost was concentrated in repeated file handling and matrix traversal. Replacing the 2D indexing with two flat arrays improved cache locality and cut a third of the runtime before any concurrency was introduced.
+Callgrind profiling showed the cost was concentrated in repeated file handling and matrix traversal. Replacing the 2D indexing with two flat arrays improved cache locality and cut about a quarter of the runtime before any concurrency was introduced.
 
 ### Concurrency
 
@@ -35,7 +35,7 @@ Callgrind profiling showed the cost was concentrated in repeated file handling a
 
 **The interesting result is the failure, not the win.** The first concurrent version ran 24× *slower* than the serial code it was meant to speed up. The plate is recomputed thousands of times, and spawning and joining a thread team on every one of those iterations cost far more than the parallel work saved. Fixing it meant keeping a single thread team alive for the whole run and synchronizing it with a reusable barrier built on semaphores.
 
-Even after that, the final version only edges past the optimized serial. On this workload the per-iteration synchronization and the memory-bound access pattern leave little room for parallel gain — which is itself the useful finding.
+Even after that, the final version only edges past the optimized serial. On this workload, the per-iteration synchronization and the memory-bound access pattern leave little room for parallel gain — which is itself the useful finding.
 
 ## Layout
 
@@ -61,7 +61,7 @@ The job file lists one simulation per line:
 plate001.bin  1200  127  1000  2
 ```
 
-Columns are the binary plate file, the time step Δt, the thermal diffusivity α, the cell size h, and the equilibrium threshold ε.
+The columns are the binary plate file, the time step Δt, the thermal diffusivity α, the cell size h, and the equilibrium threshold ε.
 
 Run with a job file and a thread count:
 
